@@ -1,1 +1,1 @@
-# INTEGRATION Document Reformatting Agent — Formatter Package
+# Formating AI Assistance — Formatter Package

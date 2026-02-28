@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-INTEGRATION Document Reformatting Agent — CLI Entry Point
+Formating AI Assistance — CLI Entry Point
 
 Usage:
     python main.py input.docx -o output.docx
@@ -19,7 +19,7 @@ from formatter.engine import reformat_document
 
 BANNER = r"""
   ╔══════════════════════════════════════════════════════════════╗
-  ║   INTEGRATION Energy Plus — Document Reformatting Agent     ║
+  ║   INTEGRATION Energy Plus — Formating AI Assistance         ║
   ║   Energy Master Plan for Gilgit-Baltistan, Pakistan         ║
   ╚══════════════════════════════════════════════════════════════╝
 """
@@ -27,7 +27,7 @@ BANNER = r"""
 
 def main():
     parser = argparse.ArgumentParser(
-        description="INTEGRATION Document Reformatting Agent — "
+        description="Formating AI Assistance — "
                     "Reformat .docx files to INTEGRATION Energy Plus style guide.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="Example:\n  python main.py report.docx -o report_formatted.docx "

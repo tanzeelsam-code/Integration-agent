@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-INTEGRATION Document Reformatting Agent — Flask Web UI
+Formating AI Assistance — Flask Web UI
 Drag-and-drop interface for reformatting .docx files.
 
 Usage:
@@ -100,7 +100,7 @@ def download(job_id, filename):
 
 
 if __name__ == "__main__":
-    print("\n  🌐 INTEGRATION Agent Web UI")
+    print("\n  🌐 Formating AI Assistance Web UI")
     print("  Open http://localhost:5000 in your browser\n")
     port = int(os.environ.get("PORT", 5000))
     app.run(debug=True, host="0.0.0.0", port=port)
