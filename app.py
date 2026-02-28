@@ -82,6 +82,10 @@ def upload():
 
 @app.route("/download/<job_id>/<filename>")
 def download(job_id, filename):
+    # Validate job_id to prevent path traversal
+    if not job_id.isalnum():
+        return jsonify({"error": "Invalid job ID"}), 400
+
     output_path = os.path.join(UPLOAD_DIR, f"{job_id}_output.docx")
     if not os.path.exists(output_path):
         return jsonify({"error": "File not found or expired"}), 404
@@ -89,9 +93,18 @@ def download(job_id, filename):
     if not filename.lower().endswith(".docx"):
         filename = filename + ".docx"
 
-    from flask import make_response
+    from flask import make_response, after_this_request
     with open(output_path, "rb") as f:
         data = f.read()
+
+    @after_this_request
+    def cleanup(response):
+        try:
+            if os.path.exists(output_path):
+                os.remove(output_path)
+        except OSError:
+            pass
+        return response
 
     response = make_response(data)
     response.headers["Content-Type"] = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"

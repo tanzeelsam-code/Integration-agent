@@ -54,7 +54,10 @@ def _set_cell_borders(cell, top=None, bottom=None, left=None, right=None):
 def _set_table_borders(table):
     """Set table-level borders per the INTEGRATION spec."""
     tbl = table._tbl
-    tblPr = tbl.tblPr if tbl.tblPr is not None else tbl.makeelement(qn("w:tblPr"), {})
+    tblPr = tbl.tblPr
+    if tblPr is None:
+        tblPr = tbl.makeelement(qn("w:tblPr"), {})
+        tbl.insert(0, tblPr)
 
     # Remove existing borders
     existing = tblPr.find(qn("w:tblBorders"))
@@ -77,7 +80,10 @@ def _set_table_borders(table):
 def _set_table_width(table):
     """Set total table width to 9000 DXA."""
     tbl = table._tbl
-    tblPr = tbl.tblPr if tbl.tblPr is not None else tbl.makeelement(qn("w:tblPr"), {})
+    tblPr = tbl.tblPr
+    if tblPr is None:
+        tblPr = tbl.makeelement(qn("w:tblPr"), {})
+        tbl.insert(0, tblPr)
 
     # Remove existing width
     existing = tblPr.find(qn("w:tblW"))
@@ -91,7 +97,10 @@ def _set_table_width(table):
 def _set_cell_padding(table):
     """Set default cell margin/padding for the table."""
     tbl = table._tbl
-    tblPr = tbl.tblPr if tbl.tblPr is not None else tbl.makeelement(qn("w:tblPr"), {})
+    tblPr = tbl.tblPr
+    if tblPr is None:
+        tblPr = tbl.makeelement(qn("w:tblPr"), {})
+        tbl.insert(0, tblPr)
 
     existing = tblPr.find(qn("w:tblCellMar"))
     if existing is not None:

@@ -101,7 +101,10 @@ def renumber_headings(doc) -> list[dict]:
         # Set paragraph style
         style_name = C.LEVEL_TO_STYLE.get(level)
         if style_name:
-            para.style = doc.styles[style_name] if style_name in [s.name for s in doc.styles] else para.style
+            try:
+                para.style = doc.styles[style_name]
+            except KeyError:
+                pass  # Style not present in this document; keep current
 
         # Apply spacing
         spacing = C.HEADING_SPACING.get(level, {})

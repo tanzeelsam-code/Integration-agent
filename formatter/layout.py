@@ -169,6 +169,11 @@ def apply_footer(doc, year: str = "2026", project_number: str = "PRJ-001"):
         run_page_instr = para.add_run()
         run_page_instr._element.append(instrText)
 
+        # Separate element (required for Word to render the field result)
+        fldChar_separate = parse_xml(f'<w:fldChar {nsdecls("w")} w:fldCharType="separate"/>')
+        run_page_sep = para.add_run()
+        run_page_sep._element.append(fldChar_separate)
+
         fldChar_end = parse_xml(f'<w:fldChar {nsdecls("w")} w:fldCharType="end"/>')
         run_page_end = para.add_run()
         run_page_end._element.append(fldChar_end)

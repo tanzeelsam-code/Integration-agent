@@ -73,6 +73,11 @@ def format_bullet_lists(doc) -> int:
         for bc in bullet_chars:
             if text.startswith(bc):
                 text = text[len(bc):].strip()
+                # Rewrite runs with cleaned text (avoid double bullet)
+                if para.runs:
+                    para.runs[0].text = text
+                    for extra_run in para.runs[1:]:
+                        extra_run.text = ""
                 break
 
         # Set indentation
