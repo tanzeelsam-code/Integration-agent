@@ -43,23 +43,29 @@ def apply_paragraph_style(paragraph, element_type: str):
         apply_run_style(run, element_type)
 
 
+def _set_arial_on_run(run, changes):
+    """Set Arial font on a single run without touching bold/italic/color."""
+    if run.font.name and run.font.name != C.FONT_FAMILY:
+        changes.append(run.font.name)
+    run.font.name = C.FONT_FAMILY
+    rPr = run._element.get_or_add_rPr()
+    rFonts = rPr.find(qn("w:rFonts"))
+    if rFonts is None:
+        rFonts = run._element.makeelement(qn("w:rFonts"), {})
+        rPr.insert(0, rFonts)
+    rFonts.set(qn("w:ascii"), C.FONT_FAMILY)
+    rFonts.set(qn("w:hAnsi"), C.FONT_FAMILY)
+    rFonts.set(qn("w:cs"), C.FONT_FAMILY)
+    rFonts.set(qn("w:eastAsia"), C.FONT_FAMILY)
+
+
 def enforce_arial_everywhere(doc):
-    """Walk ALL runs in the document and force Arial font family."""
+    """Walk ALL runs in the document and force Arial font family.
+    Does NOT touch bold, italic, or colour — only the font name."""
     changes = []
     for para in doc.paragraphs:
         for run in para.runs:
-            if run.font.name and run.font.name != C.FONT_FAMILY:
-                changes.append(run.font.name)
-            run.font.name = C.FONT_FAMILY
-            rPr = run._element.get_or_add_rPr()
-            rFonts = rPr.find(qn("w:rFonts"))
-            if rFonts is None:
-                rFonts = run._element.makeelement(qn("w:rFonts"), {})
-                rPr.insert(0, rFonts)
-            rFonts.set(qn("w:ascii"), C.FONT_FAMILY)
-            rFonts.set(qn("w:hAnsi"), C.FONT_FAMILY)
-            rFonts.set(qn("w:cs"), C.FONT_FAMILY)
-            rFonts.set(qn("w:eastAsia"), C.FONT_FAMILY)
+            _set_arial_on_run(run, changes)
 
     # Also fix table cell runs
     for table in doc.tables:
@@ -67,16 +73,5 @@ def enforce_arial_everywhere(doc):
             for cell in row.cells:
                 for para in cell.paragraphs:
                     for run in para.runs:
-                        if run.font.name and run.font.name != C.FONT_FAMILY:
-                            changes.append(run.font.name)
-                        run.font.name = C.FONT_FAMILY
-                        rPr = run._element.get_or_add_rPr()
-                        rFonts = rPr.find(qn("w:rFonts"))
-                        if rFonts is None:
-                            rFonts = run._element.makeelement(qn("w:rFonts"), {})
-                            rPr.insert(0, rFonts)
-                        rFonts.set(qn("w:ascii"), C.FONT_FAMILY)
-                        rFonts.set(qn("w:hAnsi"), C.FONT_FAMILY)
-                        rFonts.set(qn("w:cs"), C.FONT_FAMILY)
-                        rFonts.set(qn("w:eastAsia"), C.FONT_FAMILY)
+                        _set_arial_on_run(run, changes)
     return changes

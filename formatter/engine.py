@@ -6,6 +6,7 @@ returns the document and a compliance summary.
 
 from docx import Document
 from docx.shared import Pt, Twips, RGBColor
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
 
 from . import constants as C
@@ -54,6 +55,9 @@ def _fix_body_spacing(doc) -> int:
 
         # Line spacing: 1.08 (single)
         pf.line_spacing = C.LINE_SPACING
+
+        # Justify body paragraphs
+        pf.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
         count += 1
 
     return count
@@ -106,6 +110,11 @@ def _remove_noncompliant_colours(doc) -> list[str]:
     corrections = []
 
     for para in doc.paragraphs:
+        # Skip headings — they use GREEN_HAZE which is allowed
+        style_name = para.style.name if para.style else ""
+        if style_name.startswith("Heading"):
+            continue
+
         for run in para.runs:
             if run.font.color and run.font.color.rgb:
                 hex_val = str(run.font.color.rgb).upper()
@@ -142,13 +151,14 @@ def reformat_document(
 
     # ── Step 1: Scan & classify (implicit — done by each module) ──
 
-    # ── Step 2: Renumber headings ──
-    headings_changed = renumber_headings(doc)
-
-    # ── Step 3: Apply typography (Arial everywhere) ──
+    # ── Step 2: Apply typography (Arial everywhere) — BEFORE headings
+    #    so heading styles applied later take precedence
     fonts_corrected = enforce_arial_everywhere(doc)
 
-    # ── Step 4: Fix spacing ──
+    # ── Step 3: Renumber headings (applies bold + green color) ──
+    headings_changed = renumber_headings(doc)
+
+    # ── Step 4: Fix spacing + justify body paragraphs ──
     spacing_count = _fix_body_spacing(doc)
 
     # ── Step 5: Reformat tables ──

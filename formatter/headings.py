@@ -82,6 +82,22 @@ def renumber_headings(doc) -> list[dict]:
         type_key = f"heading{level}"
         apply_run_style(new_run, type_key)
 
+        # ── Reinforce bold + colour at XML level for reliability ──
+        rPr = new_run._element.get_or_add_rPr()
+        # Bold
+        for tag in ("w:b", "w:bCs"):
+            el = rPr.find(qn(tag))
+            if el is None:
+                el = new_run._element.makeelement(qn(tag), {})
+                rPr.append(el)
+            el.set(qn("w:val"), "1")
+        # Color
+        color_el = rPr.find(qn("w:color"))
+        if color_el is None:
+            color_el = new_run._element.makeelement(qn("w:color"), {})
+            rPr.append(color_el)
+        color_el.set(qn("w:val"), C.GREEN_HAZE)
+
         # Set paragraph style
         style_name = C.LEVEL_TO_STYLE.get(level)
         if style_name:
