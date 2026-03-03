@@ -1,5 +1,5 @@
 """
-INTEGRATION Agent — Documentation Analysis Engine
+AGENT ZEE — Documentation Analysis Engine
 Analyzes .docx documents and produces comprehensive analysis reports with
 readability metrics, structure breakdown, and quality assessment.
 """

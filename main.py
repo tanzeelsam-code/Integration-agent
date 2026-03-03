@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-INTEGRATION Agent — CLI Entry Point with multi-job subcommands.
+AGENT ZEE — CLI Entry Point with multi-job subcommands.
 
 Usage:
     python main.py format input.docx -o output.docx
@@ -31,7 +31,7 @@ from jobs.cv_rewriting import process_cv_rewrite
 
 BANNER = r"""
   ╔══════════════════════════════════════════════════════════════╗
-  ║   INTEGRATION Agent — AI Document Processing Assistant      ║
+  ║             AGENT ZEE — AI Document Assistant               ║
   ║   Multi-Job CLI for WB, EU, and ADB Consulting              ║
   ╚══════════════════════════════════════════════════════════════╝
 """
@@ -95,7 +95,7 @@ def cmd_cv(args):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="INTEGRATION Agent — AI Document Processing Assistant",
+        description="AGENT ZEE — AI Document Processing Assistant",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     sub = parser.add_subparsers(dest="command", help="Available jobs")

@@ -1,4 +1,4 @@
-# INTEGRATION Agent — AI Document Processing Assistant
+# AGENT ZEE — AI Document Processing Assistant
 
 **Multi-job document processing for international development consulting (WB, EU, ADB)**
 
@@ -107,4 +107,4 @@ integration-agent/
 
 ---
 
-© 2026 INTEGRATION — Energy Plus Project
+© 2026 AGENT ZEE — AI Document Assistant

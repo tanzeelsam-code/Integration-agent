@@ -1,5 +1,5 @@
 """
-INTEGRATION Agent — Document Comparison Engine
+AGENT ZEE — Document Comparison Engine
 Compares two .docx documents with structural and content gap analysis.
 """
 

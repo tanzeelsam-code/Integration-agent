@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-INTEGRATION Agent — Flask Web UI
+AGENT ZEE — Flask Web UI
 Multi-job document processing assistant with drag-and-drop interface.
 """
 
@@ -190,7 +190,7 @@ def download(job_id, filename):
 
 
 if __name__ == "__main__":
-    print("\n  🌐 INTEGRATION Agent — Multi-Job AI Assistant")
+    print("\n  🌐 AGENT ZEE — Multi-Job AI Assistant")
     print("  Open http://localhost:5000 in your browser\n")
     port = int(os.environ.get("PORT", 5000))
     app.run(debug=True, host="0.0.0.0", port=port)

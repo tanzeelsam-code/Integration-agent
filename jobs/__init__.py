@@ -1,5 +1,5 @@
 """
-INTEGRATION Agent — Jobs Registry
+AGENT ZEE — Jobs Registry
 Central registry for all available processing jobs.
 """
 
@@ -15,7 +15,7 @@ from .cv_rewriting import process_cv_rewrite
 JOB_REGISTRY = {
     "formatting": {
         "name": "Document Formatting",
-        "description": "Reformat .docx files to INTEGRATION style guide with full compliance",
+        "description": "Reformat .docx files to AGENT ZEE style guide with full compliance",
         "icon": "format",
         "accept": ".docx",
         "multi_file": False,

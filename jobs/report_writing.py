@@ -1,5 +1,5 @@
 """
-INTEGRATION Agent — Report Writing Engine
+AGENT ZEE — Report Writing Engine
 Transforms raw content into professionally structured reports for WB/EU/ADB.
 """
 from docx import Document
@@ -82,7 +82,7 @@ def process_report(input_path, output_path, **kwargs):
     p=doc.add_paragraph(); p.alignment=WD_ALIGN_PARAGRAPH.CENTER
     r=p.add_run(f"\n{style} Format"); _run(r,14,color=GREY)
     p=doc.add_paragraph(); p.alignment=WD_ALIGN_PARAGRAPH.CENTER
-    r=p.add_run("\n\nPrepared by INTEGRATION Energy Plus"); _run(r,11,italic=True,color=GREY)
+    r=p.add_run("\n\nPrepared by AGENT ZEE"); _run(r,11,italic=True,color=GREY)
     doc.add_page_break()
 
     # TOC

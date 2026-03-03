@@ -1,5 +1,5 @@
 """
-INTEGRATION Agent — Project Management Engine
+AGENT ZEE — Project Management Engine
 Generates WBS, Gantt tables, RACI matrix, and risk register from project docs.
 """
 from docx import Document

@@ -1,5 +1,5 @@
 """
-INTEGRATION Agent — Proposal Development Engine
+AGENT ZEE — Proposal Development Engine
 Analyzes draft proposals/TORs and generates structured proposal documents
 compliant with WB, EU, and ADB requirements.
 """
@@ -67,7 +67,7 @@ def _set_run_style(run, size_pt, bold=False, italic=False, color=BLACK, font="Ar
 
 
 def _add_heading_styled(doc, text, level=1):
-    """Add a heading with INTEGRATION green styling."""
+    """Add a heading with AGENT ZEE green styling."""
     para = doc.add_heading(text, level=level)
     for run in para.runs:
         _set_run_style(run, 14 if level == 1 else 12 if level == 2 else 11,
@@ -163,7 +163,7 @@ def process_proposal(input_path, output_path, **kwargs):
 
     para = doc.add_paragraph()
     para.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = para.add_run("\n\nPrepared by INTEGRATION Energy Plus")
+    run = para.add_run("\n\nPrepared by AGENT ZEE")
     _set_run_style(run, 11, italic=True, color=GREY)
 
     doc.add_page_break()

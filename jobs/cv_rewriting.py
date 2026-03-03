@@ -1,5 +1,5 @@
 """
-INTEGRATION Agent — CV Reception & Rewriting Engine
+AGENT ZEE — CV Reception & Rewriting Engine
 Reformats CVs to match WB, EU, or ADB client template requirements.
 """
 from docx import Document
