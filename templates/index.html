@@ -1,766 +1,609 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formating AI Assistance</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>INTEGRATION Agent — AI Document Assistant</title>
+    <meta name="description" content="Multi-job AI document processing assistant for WB, EU, and ADB consulting">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --green-haze: #009959;
             --green-dark: #007a47;
             --green-light: #00b86b;
             --green-glow: rgba(0, 153, 89, 0.3);
-            --bg-primary: #0a0f1a;
-            --bg-secondary: #111827;
-            --bg-card: #1a2332;
-            --bg-card-hover: #1f2b3d;
+            --bg-primary: #060b14;
+            --bg-secondary: #0d1520;
+            --bg-card: #111d2e;
+            --bg-card-hover: #162438;
+            --bg-modal: #0f1923;
             --text-primary: #f0f4f8;
             --text-secondary: #94a3b8;
             --text-muted: #64748b;
-            --border: rgba(255, 255, 255, 0.08);
+            --border: rgba(255, 255, 255, 0.06);
             --border-hover: rgba(0, 153, 89, 0.4);
             --danger: #ef4444;
+            --amber: #f59e0b;
+            --blue: #3b82f6;
+            --purple: #8b5cf6;
+            --cyan: #06b6d4;
             --radius: 16px;
             --radius-sm: 10px;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Inter', -apple-system, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
-
-        /* Animated background gradient */
         body::before {
             content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background:
-                radial-gradient(ellipse at 20% 0%, rgba(0, 153, 89, 0.08) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 100%, rgba(0, 153, 89, 0.05) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: 0;
+                radial-gradient(ellipse at 15% 0%, rgba(0,153,89,0.07) 0%, transparent 50%),
+                radial-gradient(ellipse at 85% 100%, rgba(59,130,246,0.04) 0%, transparent 50%);
+            pointer-events: none; z-index: 0;
         }
 
-        .container {
-            max-width: 720px;
-            width: 100%;
-            padding: 40px 24px;
-            position: relative;
-            z-index: 1;
+        /* ── Header ── */
+        .top-bar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(6,11,20,0.85); backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 32px;
+            display: flex; align-items: center; gap: 14px;
         }
-
-        /* Header */
-        .brand {
-            text-align: center;
-            margin-bottom: 48px;
-        }
-
-        .brand-logo {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 56px;
-            height: 56px;
+        .top-logo {
+            width: 38px; height: 38px;
             background: linear-gradient(135deg, var(--green-haze), var(--green-light));
-            border-radius: 14px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 32px var(--green-glow);
-            animation: pulse-glow 3s ease-in-out infinite;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 16px var(--green-glow);
         }
+        .top-logo svg { width: 20px; height: 20px; fill: #fff; }
+        .top-title { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+        .top-subtitle { font-size: 12px; color: var(--text-muted); margin-left: auto; }
 
-        @keyframes pulse-glow {
+        /* ── Main container ── */
+        .main { max-width: 1100px; margin: 0 auto; padding: 40px 24px 60px; position: relative; z-index: 1; }
 
-            0%,
-            100% {
-                box-shadow: 0 8px 32px var(--green-glow);
-            }
-
-            50% {
-                box-shadow: 0 8px 48px rgba(0, 153, 89, 0.5);
-            }
+        .hero { text-align: center; margin-bottom: 48px; }
+        .hero h2 {
+            font-size: 32px; font-weight: 800; letter-spacing: -0.8px; margin-bottom: 10px;
+            background: linear-gradient(135deg, #fff 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
         }
+        .hero p { font-size: 15px; color: var(--text-muted); max-width: 560px; margin: 0 auto; }
 
-        .brand-logo svg {
-            width: 28px;
-            height: 28px;
-            fill: #fff;
+        /* ── Job Grid ── */
+        .job-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px; margin-bottom: 32px;
         }
-
-        .brand h1 {
-            font-size: 28px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .job-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 24px;
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            position: relative; overflow: hidden;
         }
-
-        .brand p {
-            font-size: 14px;
-            color: var(--text-muted);
-            font-weight: 400;
+        .job-card::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(0,153,89,0.03), transparent);
+            opacity: 0; transition: opacity 0.3s;
         }
-
-        .brand p strong {
-            color: var(--green-haze);
-            font-weight: 600;
-        }
-
-        /* Drop Zone */
-        .drop-zone {
-            background: var(--bg-card);
-            border: 2px dashed var(--border);
-            border-radius: var(--radius);
-            padding: 56px 32px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .drop-zone::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(0, 153, 89, 0.03), transparent);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .drop-zone:hover,
-        .drop-zone.drag-over {
-            border-color: var(--green-haze);
+        .job-card:hover {
+            border-color: var(--border-hover);
             background: var(--bg-card-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--border-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px var(--border-hover);
+        }
+        .job-card:hover::before { opacity: 1; }
+        .job-icon {
+            width: 48px; height: 48px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 16px; font-size: 22px;
+        }
+        .job-icon.format { background: rgba(0,153,89,0.15); }
+        .job-icon.proposal { background: rgba(59,130,246,0.15); }
+        .job-icon.analysis { background: rgba(139,92,246,0.15); }
+        .job-icon.comparison { background: rgba(245,158,11,0.15); }
+        .job-icon.project { background: rgba(6,182,212,0.15); }
+        .job-icon.report { background: rgba(236,72,153,0.15); }
+        .job-icon.jis { background: rgba(16,185,129,0.15); }
+        .job-icon.cv { background: rgba(249,115,22,0.15); }
+        .job-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+        .job-card p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+        .job-badge {
+            position: absolute; top: 16px; right: 16px;
+            font-size: 10px; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.5px; padding: 3px 8px;
+            border-radius: 6px; background: rgba(0,153,89,0.15); color: var(--green-haze);
         }
 
-        .drop-zone:hover::before,
-        .drop-zone.drag-over::before {
-            opacity: 1;
+        /* ── Modal Overlay ── */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+            z-index: 1000; align-items: center; justify-content: center;
+            animation: fadeIn 0.2s ease;
         }
+        .modal-overlay.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal {
+            background: var(--bg-modal); border: 1px solid var(--border);
+            border-radius: 20px; width: 620px; max-width: 95vw;
+            max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp { from { opacity:0; transform: translateY(24px); } to { opacity:1; transform: translateY(0); } }
+        .modal-header {
+            padding: 24px 28px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 14px;
+        }
+        .modal-header h3 { flex: 1; font-size: 17px; font-weight: 700; }
+        .modal-close {
+            width: 32px; height: 32px; border-radius: 8px;
+            border: 1px solid var(--border); background: transparent;
+            color: var(--text-muted); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; transition: all 0.2s;
+        }
+        .modal-close:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .modal-body { padding: 24px 28px; }
 
+        /* ── Drop Zone (inside modal) ── */
+        .drop-zone {
+            background: var(--bg-secondary); border: 2px dashed var(--border);
+            border-radius: var(--radius); padding: 40px 24px;
+            text-align: center; cursor: pointer; transition: all 0.3s;
+        }
+        .drop-zone:hover, .drop-zone.drag-over {
+            border-color: var(--green-haze); background: var(--bg-card);
+        }
         .drop-icon {
-            width: 64px;
-            height: 64px;
-            margin: 0 auto 20px;
-            background: rgba(0, 153, 89, 0.1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s;
+            width: 52px; height: 52px; margin: 0 auto 14px;
+            background: rgba(0,153,89,0.1); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
         }
+        .drop-icon svg { width: 24px; height: 24px; stroke: var(--green-haze); fill: none; stroke-width: 2; }
+        .drop-zone h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+        .drop-zone p { font-size: 12px; color: var(--text-muted); }
+        .drop-zone input { display: none; }
 
-        .drop-zone:hover .drop-icon {
-            transform: scale(1.1);
+        .dual-drop { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .dual-drop .drop-zone { padding: 28px 16px; }
+
+        /* ── File info ── */
+        .file-info {
+            background: var(--bg-card); border: 1px solid var(--border-hover);
+            border-radius: var(--radius-sm); padding: 14px 16px;
+            display: flex; align-items: center; gap: 12px;
+            margin-top: 12px; animation: slideIn 0.2s ease;
         }
-
-        .drop-icon svg {
-            width: 28px;
-            height: 28px;
-            stroke: var(--green-haze);
-            fill: none;
-            stroke-width: 2;
+        @keyframes slideIn { from { opacity:0; transform: translateY(-6px); } to { opacity:1; transform: translateY(0); } }
+        .file-info .fi-icon {
+            width: 36px; height: 36px; background: rgba(0,153,89,0.1);
+            border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
-
-        .drop-zone h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 6px;
+        .file-info .fi-icon svg { width: 18px; height: 18px; stroke: var(--green-haze); fill: none; stroke-width: 2; }
+        .file-info .fi-details { flex: 1; min-width: 0; }
+        .file-info .fi-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .file-info .fi-size { font-size: 11px; color: var(--text-muted); }
+        .file-info .fi-remove {
+            background: rgba(239,68,68,0.1); border: none; border-radius: 6px;
+            width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--danger); font-size: 12px; transition: background 0.2s;
         }
+        .file-info .fi-remove:hover { background: rgba(239,68,68,0.2); }
 
-        .drop-zone p {
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-
-        .drop-zone input[type="file"] {
-            display: none;
-        }
-
-        /* Settings Panel */
-        .settings {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 24px;
-            margin-top: 16px;
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 16px;
-        }
-
-        .field {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
+        /* ── Settings fields ── */
+        .fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+        .field { display: flex; flex-direction: column; gap: 5px; }
+        .field.full-width { grid-column: 1 / -1; }
         .field label {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: var(--text-muted);
+            font-size: 10px; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.7px; color: var(--text-muted);
         }
-
-        .field input {
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 10px 14px;
-            color: var(--text-primary);
-            font-size: 13px;
-            font-family: 'Inter', sans-serif;
+        .field input, .field select {
+            background: var(--bg-secondary); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 10px 12px;
+            color: var(--text-primary); font-size: 13px; font-family: 'Inter',sans-serif;
             transition: border-color 0.2s;
         }
-
-        .field input:focus {
-            outline: none;
-            border-color: var(--green-haze);
+        .field input:focus, .field select:focus {
+            outline: none; border-color: var(--green-haze);
             box-shadow: 0 0 0 3px var(--green-glow);
         }
+        .field select option { background: var(--bg-secondary); }
 
-        /* File Info */
-        .file-info {
-            background: var(--bg-card);
-            border: 1px solid var(--border-hover);
-            border-radius: var(--radius);
-            padding: 20px 24px;
-            margin-top: 16px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-8px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .file-icon {
-            width: 44px;
-            height: 44px;
-            background: rgba(0, 153, 89, 0.1);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .file-icon svg {
-            width: 22px;
-            height: 22px;
-            stroke: var(--green-haze);
-            fill: none;
-            stroke-width: 2;
-        }
-
-        .file-details {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .file-name {
-            font-size: 14px;
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .file-size {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        .file-remove {
-            background: rgba(239, 68, 68, 0.1);
-            border: none;
-            border-radius: 8px;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: var(--danger);
-            transition: background 0.2s;
-        }
-
-        .file-remove:hover {
-            background: rgba(239, 68, 68, 0.2);
-        }
-
-        /* Process Button */
+        /* ── Process Button ── */
         .btn-process {
-            width: 100%;
-            padding: 16px;
-            margin-top: 16px;
+            width: 100%; padding: 14px; margin-top: 20px;
             background: linear-gradient(135deg, var(--green-haze), var(--green-dark));
-            color: #fff;
-            font-size: 15px;
-            font-weight: 600;
-            font-family: 'Inter', sans-serif;
-            border: none;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
+            color: #fff; font-size: 14px; font-weight: 600;
+            font-family: 'Inter',sans-serif; border: none;
+            border-radius: var(--radius-sm); cursor: pointer; transition: all 0.3s;
         }
+        .btn-process:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 24px var(--green-glow); }
+        .btn-process:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .btn-process::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.1));
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .btn-process:hover:not(:disabled)::after {
-            opacity: 1;
-        }
-
-        .btn-process:hover:not(:disabled) {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 24px var(--green-glow);
-        }
-
-        .btn-process:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Progress */
-        .progress-bar {
-            display: none;
-            margin-top: 16px;
-            background: var(--bg-card);
-            border-radius: var(--radius);
-            padding: 24px;
-            text-align: center;
-        }
-
-        .progress-bar.active {
-            display: block;
-            animation: slideIn 0.3s ease;
-        }
-
+        /* ── Progress & Results ── */
+        .progress-bar { display: none; margin-top: 20px; text-align: center; padding: 20px; }
+        .progress-bar.active { display: block; }
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--border);
-            border-top-color: var(--green-haze);
-            border-radius: 50%;
-            margin: 0 auto 16px;
+            width: 36px; height: 36px;
+            border: 3px solid var(--border); border-top-color: var(--green-haze);
+            border-radius: 50%; margin: 0 auto 12px;
             animation: spin 0.8s linear infinite;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .progress-bar p { font-size: 13px; color: var(--text-secondary); }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .progress-bar p {
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        /* Result */
-        .result {
-            display: none;
-            margin-top: 16px;
-            animation: slideIn 0.3s ease;
-        }
-
-        .result.active {
-            display: block;
-        }
-
+        .result { display: none; margin-top: 16px; }
+        .result.active { display: block; animation: slideIn 0.3s ease; }
         .result-header {
-            background: linear-gradient(135deg, rgba(0, 153, 89, 0.15), rgba(0, 153, 89, 0.05));
+            background: linear-gradient(135deg, rgba(0,153,89,0.12), rgba(0,153,89,0.03));
             border: 1px solid var(--border-hover);
-            border-radius: var(--radius);
-            padding: 24px;
-            text-align: center;
-            margin-bottom: 16px;
+            border-radius: var(--radius); padding: 20px; text-align: center; margin-bottom: 12px;
         }
-
-        .result-header .check {
-            width: 48px;
-            height: 48px;
-            background: rgba(0, 153, 89, 0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 12px;
+        .result-check {
+            width: 42px; height: 42px; background: rgba(0,153,89,0.2);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 10px;
         }
-
-        .result-header .check svg {
-            width: 24px;
-            height: 24px;
-            stroke: var(--green-haze);
-            fill: none;
-            stroke-width: 3;
-        }
-
-        .result-header h3 {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .result-header p {
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-
+        .result-check svg { width: 22px; height: 22px; stroke: var(--green-haze); fill: none; stroke-width: 3; }
+        .result-header h3 { font-size: 16px; font-weight: 700; margin-bottom: 3px; }
+        .result-header p { font-size: 12px; color: var(--text-muted); }
         .btn-download {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 14px 32px;
-            margin-top: 16px;
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 12px 28px; margin-top: 12px;
             background: linear-gradient(135deg, var(--green-haze), var(--green-dark));
-            color: #fff;
-            font-size: 14px;
-            font-weight: 600;
-            font-family: 'Inter', sans-serif;
-            border: none;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.3s;
+            color: #fff; font-size: 13px; font-weight: 600;
+            font-family: 'Inter',sans-serif; border: none;
+            border-radius: var(--radius-sm); cursor: pointer;
+            text-decoration: none; transition: all 0.3s;
         }
-
-        .btn-download:hover {
-            box-shadow: 0 8px 24px var(--green-glow);
-            transform: translateY(-1px);
-        }
-
-        /* Compliance summary */
+        .btn-download:hover { box-shadow: 0 8px 24px var(--green-glow); transform: translateY(-1px); }
         .summary-box {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 24px;
-            overflow-x: auto;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 16px; overflow-x: auto;
         }
-
         .summary-box h4 {
-            font-size: 13px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: var(--text-muted);
-            margin-bottom: 16px;
+            font-size: 11px; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.6px; color: var(--text-muted); margin-bottom: 10px;
         }
-
         .summary-box pre {
-            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-            font-size: 12px;
-            line-height: 1.8;
-            color: var(--text-secondary);
-            white-space: pre-wrap;
-            word-break: break-word;
+            font-family: 'SF Mono','Fira Code','Consolas',monospace;
+            font-size: 11px; line-height: 1.7; color: var(--text-secondary);
+            white-space: pre-wrap; word-break: break-word;
         }
-
-        /* Error */
         .error-box {
-            display: none;
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: var(--radius);
-            padding: 20px 24px;
-            margin-top: 16px;
-            color: #fca5a5;
-            font-size: 14px;
-            animation: slideIn 0.3s ease;
+            display: none; background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.3);
+            border-radius: var(--radius-sm); padding: 14px 16px;
+            margin-top: 12px; color: #fca5a5; font-size: 13px;
         }
+        .error-box.active { display: block; animation: slideIn 0.2s ease; }
 
-        .error-box.active {
-            display: block;
-        }
-
-        /* Footer */
+        /* ── Footer ── */
         .page-footer {
-            margin-top: 48px;
-            padding: 24px;
-            text-align: center;
-            font-size: 12px;
-            color: var(--text-muted);
+            text-align: center; padding: 24px; font-size: 11px;
+            color: var(--text-muted); border-top: 1px solid var(--border);
+            margin-top: 40px;
         }
+        .page-footer a { color: var(--green-haze); text-decoration: none; }
 
-        .page-footer a {
-            color: var(--green-haze);
-            text-decoration: none;
-        }
-
-        /* Responsive */
         @media (max-width: 640px) {
-            .settings {
-                grid-template-columns: 1fr;
-            }
-
-            .brand h1 {
-                font-size: 22px;
-            }
+            .job-grid { grid-template-columns: 1fr; }
+            .hero h2 { font-size: 24px; }
+            .fields-grid { grid-template-columns: 1fr; }
+            .dual-drop { grid-template-columns: 1fr; }
         }
     </style>
 </head>
-
 <body>
-    <div class="container">
-        <!-- Brand -->
-        <div class="brand">
-            <div class="brand-logo">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                    <line x1="16" y1="13" x2="8" y2="13" />
-                    <line x1="16" y1="17" x2="8" y2="17" />
-                    <polyline points="10 9 9 9 8 9" />
-                </svg>
-            </div>
-            <h1>Formating AI Assistance</h1>
-            <p><strong>Energy Plus</strong> — Document Reformatting for Gilgit-Baltistan</p>
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="top-logo">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8" fill="none" stroke="#fff" stroke-width="1.5"/>
+            </svg>
+        </div>
+        <span class="top-title">INTEGRATION Agent</span>
+        <span class="top-subtitle">AI Document Processing Assistant</span>
+    </div>
+
+    <div class="main">
+        <!-- Hero -->
+        <div class="hero">
+            <h2>What would you like to do?</h2>
+            <p>Select a job below to get started. Upload your .docx files and let the agent process them for you.</p>
         </div>
 
-        <!-- Drop Zone -->
-        <div class="drop-zone" id="dropZone">
-            <div class="drop-icon">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="17 8 12 3 7 8" />
-                    <line x1="12" y1="3" x2="12" y2="15" />
-                </svg>
-            </div>
-            <h3>Drop your .docx file here</h3>
-            <p>or click to browse — max 50MB</p>
-            <input type="file" id="fileInput" accept=".docx">
-        </div>
+        <!-- Job Grid -->
+        <div class="job-grid" id="jobGrid"></div>
+    </div>
 
-        <!-- File Info -->
-        <div class="file-info" id="fileInfo" style="display:none;">
-            <div class="file-icon">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                </svg>
+    <!-- Modal Overlay -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="modal">
+            <div class="modal-header">
+                <div class="job-icon" id="modalIcon" style="width:36px;height:36px;margin:0;"></div>
+                <h3 id="modalTitle"></h3>
+                <button class="modal-close" id="modalClose">✕</button>
             </div>
-            <div class="file-details">
-                <div class="file-name" id="fileName"></div>
-                <div class="file-size" id="fileSize"></div>
-            </div>
-            <button class="file-remove" id="fileRemove" title="Remove file">✕</button>
-        </div>
-
-        <!-- Settings -->
-        <div class="settings">
-            <div class="field">
-                <label>Report Name</label>
-                <input type="text" id="reportName" value="Report" placeholder="Report name">
-            </div>
-            <div class="field">
-                <label>Year</label>
-                <input type="text" id="year" value="2026" placeholder="2026">
-            </div>
-            <div class="field">
-                <label>Project Number</label>
-                <input type="text" id="projectNumber" value="PRJ-001" placeholder="PRJ-001">
-            </div>
-        </div>
-
-        <!-- Process Button -->
-        <button class="btn-process" id="processBtn" disabled>Reformat Document</button>
-
-        <!-- Progress -->
-        <div class="progress-bar" id="progressBar">
-            <div class="spinner"></div>
-            <p>Applying formatting style guide…</p>
-        </div>
-
-        <!-- Error -->
-        <div class="error-box" id="errorBox"></div>
-
-        <!-- Result -->
-        <div class="result" id="result">
-            <div class="result-header">
-                <div class="check">
-                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                </div>
-                <h3>Reformatting Complete</h3>
-                <p>Your document is now fully INTEGRATION-compliant.</p>
-                <a class="btn-download" id="downloadBtn" href="#">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                        <polyline points="7 10 12 15 17 10" />
-                        <line x1="12" y1="15" x2="12" y2="3" />
-                    </svg>
-                    Download Formatted Document
-                </a>
-            </div>
-            <div class="summary-box">
-                <h4>Compliance Summary</h4>
-                <pre id="summaryText"></pre>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="page-footer">
-            © 2026 INTEGRATION Energy Plus — Formating AI Assistance
+            <div class="modal-body" id="modalBody"></div>
         </div>
     </div>
 
-    <script>
-        const dropZone = document.getElementById('dropZone');
-        const fileInput = document.getElementById('fileInput');
-        const fileInfo = document.getElementById('fileInfo');
-        const fileName = document.getElementById('fileName');
-        const fileSize = document.getElementById('fileSize');
-        const fileRemove = document.getElementById('fileRemove');
-        const processBtn = document.getElementById('processBtn');
-        const progressBar = document.getElementById('progressBar');
-        const errorBox = document.getElementById('errorBox');
-        const result = document.getElementById('result');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const summaryText = document.getElementById('summaryText');
+    <!-- Footer -->
+    <div class="page-footer">
+        © 2026 <a href="#">INTEGRATION Energy Plus</a> — AI Document Assistant
+    </div>
 
-        let selectedFile = null;
+<script>
+const ICONS = {
+    format: '📄', proposal: '📋', analysis: '🔍', comparison: '⚖️',
+    project: '📊', report: '✍️', jis: '🗺️', cv: '👤'
+};
 
-        // ── Drop Zone Events ──
-        dropZone.addEventListener('click', () => fileInput.click());
+let jobs = [];
+let activeJob = null;
+let selectedFiles = { file: null, file2: null };
 
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('drag-over');
-        });
+// ── Load jobs ──
+async function loadJobs() {
+    try {
+        const res = await fetch('/api/jobs');
+        jobs = await res.json();
+        renderGrid();
+    } catch(e) {
+        console.error('Failed to load jobs', e);
+    }
+}
 
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('drag-over');
-        });
+function renderGrid() {
+    const grid = document.getElementById('jobGrid');
+    grid.innerHTML = jobs.map(j => `
+        <div class="job-card" onclick="openJob('${j.id}')">
+            <div class="job-icon ${j.icon}">${ICONS[j.icon] || '📁'}</div>
+            ${j.multi_file ? '<span class="job-badge">2 Files</span>' : ''}
+            <h3>${j.name}</h3>
+            <p>${j.description}</p>
+        </div>
+    `).join('');
+}
 
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) handleFile(files[0]);
-        });
+// ── Modal ──
+function openJob(jobId) {
+    activeJob = jobs.find(j => j.id === jobId);
+    if (!activeJob) return;
 
-        fileInput.addEventListener('change', () => {
-            if (fileInput.files.length > 0) handleFile(fileInput.files[0]);
-        });
+    selectedFiles = { file: null, file2: null };
 
-        fileRemove.addEventListener('click', () => {
-            selectedFile = null;
-            fileInfo.style.display = 'none';
-            dropZone.style.display = 'block';
-            processBtn.disabled = true;
-            result.classList.remove('active');
-            errorBox.classList.remove('active');
-        });
+    document.getElementById('modalTitle').textContent = activeJob.name;
+    const iconEl = document.getElementById('modalIcon');
+    iconEl.className = `job-icon ${activeJob.icon}`;
+    iconEl.textContent = ICONS[activeJob.icon] || '📁';
+    iconEl.style.fontSize = '18px';
 
-        function handleFile(file) {
-            if (!file.name.toLowerCase().endsWith('.docx')) {
-                showError('Please select a .docx file');
-                return;
+    const body = document.getElementById('modalBody');
+    body.innerHTML = buildModalContent(activeJob);
+    bindModalEvents(activeJob);
+
+    document.getElementById('modalOverlay').classList.add('active');
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    activeJob = null;
+}
+
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('modalOverlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
+});
+
+function buildModalContent(job) {
+    let html = '';
+
+    // Drop zone(s)
+    if (job.multi_file) {
+        html += `<div class="dual-drop">
+            <div>
+                <div class="drop-zone" id="dz1" data-target="file">
+                    <div class="drop-icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+                    <h4>Document A</h4><p>Drop .docx</p>
+                    <input type="file" id="fi1" accept=".docx">
+                </div>
+                <div class="file-info" id="fileInfo1" style="display:none">
+                    <div class="fi-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                    <div class="fi-details"><div class="fi-name" id="fn1"></div><div class="fi-size" id="fs1"></div></div>
+                    <button class="fi-remove" onclick="removeFile('file',1)">✕</button>
+                </div>
+            </div>
+            <div>
+                <div class="drop-zone" id="dz2" data-target="file2">
+                    <div class="drop-icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+                    <h4>Document B</h4><p>Drop .docx</p>
+                    <input type="file" id="fi2" accept=".docx">
+                </div>
+                <div class="file-info" id="fileInfo2" style="display:none">
+                    <div class="fi-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                    <div class="fi-details"><div class="fi-name" id="fn2"></div><div class="fi-size" id="fs2"></div></div>
+                    <button class="fi-remove" onclick="removeFile('file2',2)">✕</button>
+                </div>
+            </div>
+        </div>`;
+    } else {
+        html += `<div class="drop-zone" id="dz1" data-target="file">
+            <div class="drop-icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+            <h4>Drop your .docx file here</h4><p>or click to browse — max 50MB</p>
+            <input type="file" id="fi1" accept=".docx">
+        </div>
+        <div class="file-info" id="fileInfo1" style="display:none">
+            <div class="fi-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+            <div class="fi-details"><div class="fi-name" id="fn1"></div><div class="fi-size" id="fs1"></div></div>
+            <button class="fi-remove" onclick="removeFile('file',1)">✕</button>
+        </div>`;
+    }
+
+    // Fields
+    if (job.fields && job.fields.length > 0) {
+        html += '<div class="fields-grid">';
+        for (const f of job.fields) {
+            const isSelect = f.type === 'select';
+            if (isSelect) {
+                html += `<div class="field"><label>${f.label}</label>
+                    <select id="field_${f.id}">
+                        ${f.options.map(o => `<option value="${o}" ${o===f.default?'selected':''}>${o}</option>`).join('')}
+                    </select></div>`;
+            } else {
+                html += `<div class="field"><label>${f.label}</label>
+                    <input type="text" id="field_${f.id}" value="${f.default || ''}" placeholder="${f.label}"></div>`;
             }
-            selectedFile = file;
-            fileName.textContent = file.name;
-            fileSize.textContent = formatSize(file.size);
-            fileInfo.style.display = 'flex';
-            dropZone.style.display = 'none';
-            processBtn.disabled = false;
-            result.classList.remove('active');
-            errorBox.classList.remove('active');
         }
+        html += '</div>';
+    }
 
-        function formatSize(bytes) {
-            if (bytes < 1024) return bytes + ' B';
-            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-        }
+    // Button, progress, error, result
+    html += `<button class="btn-process" id="processBtn" disabled>Process Document</button>
+        <div class="progress-bar" id="progressBar"><div class="spinner"></div><p>Processing your document…</p></div>
+        <div class="error-box" id="errorBox"></div>
+        <div class="result" id="result">
+            <div class="result-header">
+                <div class="result-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <h3>Processing Complete</h3>
+                <p id="resultSubtitle">Your document is ready.</p>
+                <a class="btn-download" id="downloadBtn" href="#">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Download
+                </a>
+            </div>
+            <div class="summary-box"><h4>Summary</h4><pre id="summaryText"></pre></div>
+        </div>`;
 
-        // ── Process ──
-        processBtn.addEventListener('click', async () => {
-            if (!selectedFile) return;
+    return html;
+}
 
-            const formData = new FormData();
-            formData.append('file', selectedFile);
-            formData.append('report_name', document.getElementById('reportName').value);
-            formData.append('year', document.getElementById('year').value);
-            formData.append('project_number', document.getElementById('projectNumber').value);
+function bindModalEvents(job) {
+    // Drop zones
+    const zones = job.multi_file ? [['dz1','fi1','file',1],['dz2','fi2','file2',2]] : [['dz1','fi1','file',1]];
+    for (const [dzId, fiId, target, num] of zones) {
+        const dz = document.getElementById(dzId);
+        const fi = document.getElementById(fiId);
+        if (!dz || !fi) continue;
 
-            processBtn.disabled = true;
-            progressBar.classList.add('active');
-            result.classList.remove('active');
-            errorBox.classList.remove('active');
-
-            try {
-                const res = await fetch('/upload', { method: 'POST', body: formData });
-                const data = await res.json();
-
-                progressBar.classList.remove('active');
-
-                if (data.error) {
-                    showError(data.error);
-                    processBtn.disabled = false;
-                    return;
-                }
-
-                // Show result
-                downloadBtn.href = data.download_url;
-                summaryText.textContent = data.summary;
-                result.classList.add('active');
-                processBtn.disabled = false;
-
-            } catch (err) {
-                progressBar.classList.remove('active');
-                showError('Network error — please try again.');
-                processBtn.disabled = false;
-            }
+        dz.addEventListener('click', () => fi.click());
+        dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+        dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+        dz.addEventListener('drop', e => {
+            e.preventDefault(); dz.classList.remove('drag-over');
+            if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0], target, num);
         });
+        fi.addEventListener('change', () => { if (fi.files.length > 0) handleFile(fi.files[0], target, num); });
+    }
 
-        function showError(msg) {
-            errorBox.textContent = '❌  ' + msg;
-            errorBox.classList.add('active');
-        }
-    </script>
+    // Process button
+    document.getElementById('processBtn').addEventListener('click', () => processDocument());
+}
+
+function handleFile(file, target, num) {
+    if (!file.name.toLowerCase().endsWith('.docx')) {
+        showError('Please select a .docx file'); return;
+    }
+    selectedFiles[target] = file;
+    const info = document.getElementById('fileInfo'+num);
+    const dz = document.getElementById('dz'+num);
+    document.getElementById('fn'+num).textContent = file.name;
+    document.getElementById('fs'+num).textContent = fmtSize(file.size);
+    info.style.display = 'flex'; dz.style.display = 'none';
+    updateProcessBtn();
+    // Reset result/error
+    const r = document.getElementById('result'); if(r) r.classList.remove('active');
+    const e = document.getElementById('errorBox'); if(e) e.classList.remove('active');
+}
+
+function removeFile(target, num) {
+    selectedFiles[target] = null;
+    document.getElementById('fileInfo'+num).style.display = 'none';
+    document.getElementById('dz'+num).style.display = '';
+    updateProcessBtn();
+}
+
+function updateProcessBtn() {
+    const btn = document.getElementById('processBtn');
+    if (!btn || !activeJob) return;
+    if (activeJob.multi_file) {
+        btn.disabled = !(selectedFiles.file && selectedFiles.file2);
+    } else {
+        btn.disabled = !selectedFiles.file;
+    }
+}
+
+function fmtSize(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+    return (b/1048576).toFixed(1) + ' MB';
+}
+
+// ── Process ──
+async function processDocument() {
+    if (!activeJob) return;
+    const btn = document.getElementById('processBtn');
+    const prog = document.getElementById('progressBar');
+    const res = document.getElementById('result');
+    const err = document.getElementById('errorBox');
+
+    btn.disabled = true;
+    prog.classList.add('active');
+    res.classList.remove('active');
+    err.classList.remove('active');
+
+    const fd = new FormData();
+    fd.append('file', selectedFiles.file);
+    if (activeJob.multi_file && selectedFiles.file2) {
+        fd.append('file2', selectedFiles.file2);
+    }
+    for (const f of (activeJob.fields || [])) {
+        const el = document.getElementById('field_' + f.id);
+        if (el) fd.append(f.id, el.value);
+    }
+
+    const endpoint = activeJob.id === 'formatting' ? '/upload' : `/process/${activeJob.id}`;
+
+    try {
+        const r = await fetch(endpoint, { method: 'POST', body: fd });
+        const data = await r.json();
+        prog.classList.remove('active');
+
+        if (data.error) { showError(data.error); btn.disabled = false; return; }
+
+        document.getElementById('downloadBtn').href = data.download_url;
+        document.getElementById('summaryText').textContent = data.summary;
+        document.getElementById('resultSubtitle').textContent = `${activeJob.name} completed successfully.`;
+        res.classList.add('active');
+        btn.disabled = false;
+    } catch(e) {
+        prog.classList.remove('active');
+        showError('Network error — please try again.');
+        btn.disabled = false;
+    }
+}
+
+function showError(msg) {
+    const box = document.getElementById('errorBox');
+    box.textContent = '❌  ' + msg;
+    box.classList.add('active');
+}
+
+// ── Init ──
+loadJobs();
+</script>
 </body>
-
 </html>

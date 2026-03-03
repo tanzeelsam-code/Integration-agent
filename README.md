@@ -1,20 +1,23 @@
-# Formating AI Assistance
+# INTEGRATION Agent — AI Document Processing Assistant
 
-**Energy Plus: Energy Master Plan for Gilgit-Baltistan, Pakistan**
+**Multi-job document processing for international development consulting (WB, EU, ADB)**
 
-A Python-based tool that takes any `.docx` document and reformats it to be **fully compliant** with the INTEGRATION Formatting Style Guide.
+A Python-based AI assistant that processes `.docx` documents across **8 specialized jobs** — from formatting and analysis to proposal generation and CV rewriting.
 
 ---
 
-## ✨ Features
+## ⚡ Available Jobs
 
-- **Full Style Compliance** — Applies exact colour palette, typography, heading hierarchy, table/figure formatting, header/footer, and bullet list rules
-- **Automatic Heading Numbering** — Detects and renumbers all headings with decimal multi-level numbering
-- **Table Reformatting** — Green header rows, alternating fills, correct border colours & sizes
-- **Figure Handling** — Validates caption placement and source lines
-- **Header & Footer** — Automated INTEGRATION branding with page numbers
-- **Compliance Summary** — Detailed change report after every reformatting run
-- **Two Interfaces** — CLI for batch/scripting, Web UI for drag-and-drop ease
+| # | Job | Description |
+|---|-----|-------------|
+| 1 | **Document Formatting** | Reformat `.docx` files to INTEGRATION style guide with full compliance |
+| 2 | **Proposal Development** | Generate structured proposals compliant with WB, EU, ADB requirements |
+| 3 | **Documentation Analysis** | Readability metrics, structure breakdown, quality scoring |
+| 4 | **Document Comparison** | Compare two documents with structural & content gap analysis |
+| 5 | **Project Management** | Generate WBS, Gantt tables, RACI matrix, risk register |
+| 6 | **Report Writing** | Transform raw content into professional WB/EU/ADB reports |
+| 7 | **JIS Mapping** | Results Framework, LogFrame, and M&E mapping matrix |
+| 8 | **CV Reception & Rewriting** | Reformat CVs to WB, EU, or ADB template requirements |
 
 ---
 
@@ -23,27 +26,42 @@ A Python-based tool that takes any `.docx` document and reformats it to be **ful
 ### Install Dependencies
 
 ```bash
-cd integration-agent
 pip install -r requirements.txt
+```
+
+### Web UI (Recommended)
+
+```bash
+python app.py
+# Open http://localhost:5000 in your browser
 ```
 
 ### CLI Usage
 
 ```bash
-python main.py input.docx -o output.docx
+# Document Formatting
+python main.py format input.docx -o output.docx --report "Energy Master Plan" --year 2026
 
-# With custom header/footer values:
-python main.py input.docx -o output.docx \
-    --report "Energy Master Plan" \
-    --year 2026 \
-    --project "EMP-GB-001"
-```
+# Proposal Development
+python main.py proposal draft.docx -o proposal.docx --client "World Bank (WB)" --title "Energy Project"
 
-### Web UI
+# Documentation Analysis
+python main.py analyze report.docx -o analysis.docx --depth "Deep Dive"
 
-```bash
-python app.py
-# Open http://localhost:5000 in your browser
+# Document Comparison
+python main.py compare doc_a.docx doc_b.docx -o comparison.docx
+
+# Project Management
+python main.py project project.docx -o pm_report.docx --name "GB Energy" --duration 24
+
+# Report Writing
+python main.py report raw.docx -o report.docx --style "World Bank" --title "Final Report"
+
+# JIS Mapping
+python main.py jis project.docx -o jis.docx --framework "Full Package" --sector "Energy"
+
+# CV Rewriting
+python main.py cv resume.docx -o cv_wb.docx --client "World Bank (WB)" --position "Team Leader"
 ```
 
 ---
@@ -52,9 +70,9 @@ python app.py
 
 ```
 integration-agent/
-├── main.py              # CLI entry point
-├── app.py               # Flask web UI
-├── formatter/
+├── main.py              # CLI entry point (8 subcommands)
+├── app.py               # Flask web UI (multi-job dashboard)
+├── formatter/           # Document formatting engine
 │   ├── constants.py     # Colour palette, typography, layout constants
 │   ├── engine.py        # Core orchestrator (12-step pipeline)
 │   ├── headings.py      # Heading detection & auto-numbering
@@ -64,45 +82,28 @@ integration-agent/
 │   ├── layout.py        # Page layout, header & footer
 │   ├── lists.py         # Bullet list formatting
 │   └── compliance.py    # Compliance summary generator
+├── jobs/                # Job processing engines
+│   ├── __init__.py      # Job registry & metadata
+│   ├── proposal_development.py
+│   ├── document_analysis.py
+│   ├── comparison.py
+│   ├── project_management.py
+│   ├── report_writing.py
+│   ├── jis_mapping.py
+│   └── cv_rewriting.py
 ├── templates/
-│   └── index.html       # Web UI template
+│   └── index.html       # Multi-job dashboard UI
 ├── requirements.txt
 └── README.md
 ```
 
 ---
 
-## 🎨 INTEGRATION Style Guide Summary
+## 🎨 Client Templates Supported
 
-| Element | Specification |
-|---|---|
-| Font | Arial throughout |
-| Headings | Green `#009959`, 14/12/11/11 pt |
-| Table Headers | Green fill, white bold text |
-| Table Rows | Alternating white / `#E2EFD9` |
-| Inner Borders | `#80CCB0` (NOT `#E2EFD9`) |
-| Page Size | A4 Portrait, 2cm margins |
-| Header | Right-aligned, grey text, green border |
-| Footer | Copyright left, page number right (bold green) |
-
----
-
-## 📋 Compliance Summary
-
-After every run, the agent outputs a structured report:
-
-```
-COMPLIANCE SUMMARY
-==================
-Headings renumbered:      [list of changes]
-Tables reformatted:       [count and names]
-Figures reformatted:      [count and names]
-Captions corrected:       [details]
-Fonts corrected:          [non-Arial fonts replaced]
-Colours corrected:        [non-compliant colours replaced]
-Header/footer applied:    Yes / No
-...
-```
+**World Bank (WB)** — Standard proposal structure, WB CV format, Results Framework  
+**European Union (EU)** — Europass CV, EU proposal format, CEFR language scales  
+**Asian Development Bank (ADB)** — ADB proposal format, detailed assignment descriptions  
 
 ---
 
