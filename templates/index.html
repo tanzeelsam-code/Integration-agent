@@ -962,8 +962,13 @@
                 ? activeJob.accept
                 : '.docx,.pdf,.png,.jpg,.jpeg,.bmp,.gif,.tif,.tiff,.webp'
             ).split(',').map(e => e.trim());
+
             if (!allowed.some(ext => file.name.toLowerCase().endsWith(ext))) {
                 showError(`Please select a supported file: ${allowed.join(' or ')}`); return;
+            }
+
+            if (file.size > 32 * 1024 * 1024) {
+                showError(`File is too large (${(file.size / 1024 / 1024).toFixed(1)} MB). The maximum size allowed by Cloud Run is 32 MB.`); return;
             }
             selectedFiles[target] = file;
             const info = document.getElementById('fileInfo' + num);
