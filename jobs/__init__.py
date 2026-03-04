@@ -12,6 +12,7 @@ from .report_writing import process_report
 
 from .cv_rewriting import process_cv_rewrite
 from .contract_management import process_contract
+from .gis_extraction import process_gis
 from input_adapter import supported_extensions_csv
 
 
@@ -142,6 +143,15 @@ JOB_REGISTRY = {
              "default": "Standard Consulting"},
         ],
         "processor": process_contract,
+    },
+    "gis": {
+        "name": "GIS Coordinate Extraction",
+        "description": "Extract geographic coordinates from uploads and export as CSV",
+        "icon": "gis",
+        "accept": ACCEPTED_UPLOADS,
+        "multi_file": False,
+        "fields": [],
+        "processor": process_gis,
     },
 }
 

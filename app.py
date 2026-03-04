@@ -9,6 +9,7 @@ import os
 import uuid
 import tempfile
 from pathlib import Path
+
 from flask import Flask, render_template, request, send_file, jsonify
 from werkzeug.utils import secure_filename
 
@@ -27,6 +28,7 @@ from gis.data_loader import (
     get_available_layers,
 )
 from gis.layers import ENERGY_LAYERS
+
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50MB max
@@ -47,6 +49,7 @@ def _append_conversion_notes(summary: str, notes: list[str]) -> str:
         return summary
     note_block = "\n".join(f"- {n}" for n in filtered)
     return f"{summary}\nINPUT CONVERSION NOTES\n{'=' * 40}\n{note_block}\n"
+
 
 # Shared GIS state (per-process; fine for single-server)
 _custom_geojson_data = None
@@ -182,7 +185,6 @@ def upload():
     output_path = os.path.join(UPLOAD_DIR, f"{job_id}_output.docx")
 
     file.save(input_path)
-    prepared = {"path": input_path, "note": None}
 
     try:
         prepared = normalize_input_to_docx(input_path, prepared_input_path)
@@ -195,7 +197,7 @@ def upload():
         )
         summary = _append_conversion_notes(summary, [prepared.get("note")])
 
-        out_filename = _build_download_name("FORMATTED", file.filename)
+        out_filename = _build_download_name("FORMATTED", file.filename, ".docx")
 
         return jsonify(
             {
@@ -223,11 +225,9 @@ def process_job(job_type):
     if not job_def:
         return jsonify({"error": f"Unknown job type: {job_type}"}), 400
 
-    # Handle formatting job via legacy path
     if job_type == "formatting":
         return upload()
 
-    # File handling
     if job_def.get("multi_file"):
         if "file" not in request.files or "file2" not in request.files:
             return jsonify({"error": "Two files required for comparison"}), 400
@@ -243,7 +243,6 @@ def process_job(job_type):
         if file1.filename == "":
             return jsonify({"error": "No file selected"}), 400
 
-    # Validate file extension against the job's accepted types
     allowed_exts = [e.strip() for e in job_def.get("accept", ".docx").split(",")]
 
     def _allowed(filename):
@@ -264,14 +263,20 @@ def process_job(job_type):
     ext1 = Path(file1.filename).suffix.lower()
     input_path = os.path.join(UPLOAD_DIR, f"{job_id}_input{ext1}")
     prepared_input1 = os.path.join(UPLOAD_DIR, f"{job_id}_input_prepared.docx")
-    ext2 = Path(file2.filename).suffix.lower() if file2 else None
-    input_path2 = os.path.join(UPLOAD_DIR, f"{job_id}_input2{ext2}") if file2 else None
-    prepared_input2 = os.path.join(UPLOAD_DIR, f"{job_id}_input2_prepared.docx") if file2 else None
-    file_ext = ".csv" if job_type == "gis" else ".docx"
-    output_path = os.path.join(UPLOAD_DIR, f"{job_id}_output{file_ext}" )
+
+    if file2:
+        ext2 = Path(file2.filename).suffix.lower()
+        input_path2 = os.path.join(UPLOAD_DIR, f"{job_id}_input2{ext2}")
+        prepared_input2 = os.path.join(UPLOAD_DIR, f"{job_id}_input2_prepared.docx")
+    else:
+        input_path2 = None
+        prepared_input2 = None
+
+    output_ext = ".csv" if job_type == "gis" else ".docx"
+    output_path = os.path.join(UPLOAD_DIR, f"{job_id}_output{output_ext}")
 
     file1.save(input_path)
-    if file2:
+    if file2 and input_path2:
         file2.save(input_path2)
 
     process_path1 = input_path
@@ -290,21 +295,16 @@ def process_job(job_type):
 
         params = {}
         for field in job_def.get("fields", []):
-            val = request.form.get(field["id"], field.get("default", ""))
-            params[field["id"]] = val
+            params[field["id"]] = request.form.get(field["id"], field.get("default", ""))
 
         processor = job_def["processor"]
-
         if job_def.get("multi_file") and process_path2:
             summary = processor([process_path1, process_path2], output_path, **params)
         else:
             summary = processor(process_path1, output_path, **params)
-        summary = _append_conversion_notes(summary, conversion_notes)
 
-        prefix = job_type.upper()
-        file_ext = ".csv" if job_type == "gis" else ".docx"
-        stem = Path(secure_filename(file1.filename or "document")).stem or "document"
-        out_filename = f"{prefix}_{stem}{file_ext}"
+        summary = _append_conversion_notes(summary, conversion_notes)
+        out_filename = _build_download_name(job_type.upper(), file1.filename, output_ext)
 
         return jsonify(
             {
@@ -333,16 +333,14 @@ def download(job_id, filename):
     if not job_id.isalnum():
         return jsonify({"error": "Invalid job ID"}), 400
 
-    # Determine if it's a CSV or DOCX job
-    file_ext = ".csv" if filename.lower().endswith(".csv") else ".docx"
-    output_path = os.path.join(UPLOAD_DIR, f"{job_id}_output{file_ext}")
-    
-    if not os.path.exists(output_path):
-        return jsonify({"error": "File not found or expired"}), 404
-
-    safe_filename = secure_filename(filename) or f"{job_id}{file_ext}"
+    safe_filename = secure_filename(filename) or f"{job_id}.docx"
+    file_ext = ".csv" if safe_filename.lower().endswith(".csv") else ".docx"
     if not safe_filename.lower().endswith((".docx", ".csv")):
         safe_filename = safe_filename + file_ext
+
+    output_path = os.path.join(UPLOAD_DIR, f"{job_id}_output{file_ext}")
+    if not os.path.exists(output_path):
+        return jsonify({"error": "File not found or expired"}), 404
 
     from flask import make_response, after_this_request
 
