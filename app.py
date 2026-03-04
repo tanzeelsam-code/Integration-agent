@@ -26,6 +26,23 @@ app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50MB max
 UPLOAD_DIR = os.path.join(tempfile.gettempdir(), "integration_agent_uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+
+def _pdf_to_docx(pdf_path: str, docx_path: str) -> None:
+    """Extract text from a PDF and write it to a .docx for downstream processing."""
+    from pypdf import PdfReader
+    from docx import Document as DocxDocument
+
+    reader = PdfReader(pdf_path)
+    doc = DocxDocument()
+    for page in reader.pages:
+        text = page.extract_text() or ""
+        for line in text.split("\n"):
+            line = line.strip()
+            if line:
+                doc.add_paragraph(line)
+        doc.add_paragraph()
+    doc.save(docx_path)
+
 # Shared GIS state (per-process; fine for single-server)
 _custom_geojson_data = None
 
@@ -146,29 +163,38 @@ def upload():
     if file.filename == "":
         return jsonify({"error": "No file selected"}), 400
 
-    if not file.filename.lower().endswith(".docx"):
-        return jsonify({"error": "Only .docx files are supported"}), 400
+    if not file.filename.lower().endswith((".docx", ".pdf")):
+        return jsonify({"error": "Only .docx or .pdf files are supported"}), 400
 
     report_name = request.form.get("report_name", "Report")
     year = request.form.get("year", "2026")
     project_number = request.form.get("project_number", "PRJ-001")
 
     job_id = str(uuid.uuid4())[:8]
-    input_path = os.path.join(UPLOAD_DIR, f"{job_id}_input.docx")
+    input_ext = ".pdf" if file.filename.lower().endswith(".pdf") else ".docx"
+    input_path = os.path.join(UPLOAD_DIR, f"{job_id}_input{input_ext}")
     output_path = os.path.join(UPLOAD_DIR, f"{job_id}_output.docx")
 
     file.save(input_path)
+    converted_path = None
+    process_path = input_path
+
+    if input_ext == ".pdf":
+        converted_path = os.path.join(UPLOAD_DIR, f"{job_id}_input_conv.docx")
+        _pdf_to_docx(input_path, converted_path)
+        process_path = converted_path
 
     try:
         summary = reformat_document(
-            input_path=input_path,
+            input_path=process_path,
             output_path=output_path,
             report_name=report_name,
             year=year,
             project_number=project_number,
         )
 
-        out_filename = f"FORMATTED_{file.filename}"
+        base_name = os.path.splitext(file.filename)[0]
+        out_filename = f"FORMATTED_{base_name}.docx"
 
         return jsonify(
             {
@@ -184,8 +210,9 @@ def upload():
         return jsonify({"error": f"Processing failed: {str(e)}"}), 500
 
     finally:
-        if os.path.exists(input_path):
-            os.remove(input_path)
+        for p in [input_path, converted_path]:
+            if p and os.path.exists(p):
+                os.remove(p)
 
 
 @app.route("/process/<job_type>", methods=["POST"])
@@ -215,20 +242,44 @@ def process_job(job_type):
         if file1.filename == "":
             return jsonify({"error": "No file selected"}), 400
 
-    # Validate file extension
-    if not file1.filename.lower().endswith(".docx"):
-        return jsonify({"error": "Only .docx files are supported"}), 400
-    if file2 and not file2.filename.lower().endswith(".docx"):
-        return jsonify({"error": "Second file must also be .docx"}), 400
+    # Validate file extension against job's accepted types
+    allowed_exts = [e.strip() for e in job_def.get("accept", ".docx").split(",")]
+
+    def _allowed(filename):
+        return any(filename.lower().endswith(ext) for ext in allowed_exts)
+
+    if not _allowed(file1.filename):
+        return jsonify({"error": f"Unsupported file type. Allowed: {', '.join(allowed_exts)}"}), 400
+    if file2 and not _allowed(file2.filename):
+        return jsonify({"error": f"Second file must be one of: {', '.join(allowed_exts)}"}), 400
+
+    def _save_ext(filename):
+        return ".pdf" if filename.lower().endswith(".pdf") else ".docx"
 
     job_id = str(uuid.uuid4())[:8]
-    input_path = os.path.join(UPLOAD_DIR, f"{job_id}_input.docx")
-    input_path2 = os.path.join(UPLOAD_DIR, f"{job_id}_input2.docx") if file2 else None
+    ext1 = _save_ext(file1.filename)
+    input_path = os.path.join(UPLOAD_DIR, f"{job_id}_input{ext1}")
+    ext2 = _save_ext(file2.filename) if file2 else None
+    input_path2 = os.path.join(UPLOAD_DIR, f"{job_id}_input2{ext2}") if file2 else None
     output_path = os.path.join(UPLOAD_DIR, f"{job_id}_output.docx")
 
     file1.save(input_path)
     if file2:
         file2.save(input_path2)
+
+    # Convert PDF inputs to DOCX so all processors can use python-docx
+    converted = []
+    process_path1 = input_path
+    if ext1 == ".pdf":
+        process_path1 = os.path.join(UPLOAD_DIR, f"{job_id}_input_conv.docx")
+        _pdf_to_docx(input_path, process_path1)
+        converted.append(process_path1)
+
+    process_path2 = input_path2
+    if file2 and ext2 == ".pdf":
+        process_path2 = os.path.join(UPLOAD_DIR, f"{job_id}_input2_conv.docx")
+        _pdf_to_docx(input_path2, process_path2)
+        converted.append(process_path2)
 
     try:
         params = {}
@@ -238,13 +289,13 @@ def process_job(job_type):
 
         processor = job_def["processor"]
 
-        if job_def.get("multi_file") and input_path2:
-            summary = processor([input_path, input_path2], output_path, **params)
+        if job_def.get("multi_file") and process_path2:
+            summary = processor([process_path1, process_path2], output_path, **params)
         else:
-            summary = processor(input_path, output_path, **params)
+            summary = processor(process_path1, output_path, **params)
 
         prefix = job_type.upper()
-        out_filename = f"{prefix}_{file1.filename}"
+        out_filename = f"{prefix}_{file1.filename.rsplit('.', 1)[0]}.docx"
 
         return jsonify(
             {
@@ -263,7 +314,7 @@ def process_job(job_type):
         return jsonify({"error": f"Processing failed: {str(e)}"}), 500
 
     finally:
-        for p in [input_path, input_path2]:
+        for p in [input_path, input_path2] + converted:
             if p and os.path.exists(p):
                 os.remove(p)
 

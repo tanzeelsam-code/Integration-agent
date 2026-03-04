@@ -2,7 +2,7 @@
 
 **Multi-job document processing for international development consulting (WB, EU, ADB)**
 
-A Python-based AI assistant that processes `.docx` documents across **8 specialized jobs** — from formatting and analysis to proposal generation and CV rewriting.
+A Python-based AI assistant that processes `.docx` and `.pdf` documents across specialized jobs — from formatting and analysis to proposal generation and CV rewriting.
 
 ---
 
@@ -10,7 +10,7 @@ A Python-based AI assistant that processes `.docx` documents across **8 speciali
 
 | # | Job | Description |
 |---|-----|-------------|
-| 1 | **Document Formatting** | Reformat `.docx` files to INTEGRATION style guide with full compliance |
+| 1 | **Document Formatting** | Reformat `.docx`/`.pdf` files to INTEGRATION style guide with full compliance |
 | 2 | **Proposal Development** | Generate structured proposals compliant with WB, EU, ADB requirements |
 | 3 | **Documentation Analysis** | Readability metrics, structure breakdown, quality scoring |
 | 4 | **Document Comparison** | Compare two documents with structural & content gap analysis |

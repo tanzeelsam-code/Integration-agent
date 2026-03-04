@@ -753,7 +753,7 @@
         <!-- Hero -->
         <div class="hero">
             <h2>What would you like to do?</h2>
-            <p>Select a job below to get started. Upload your .docx files and let the agent process them for you.</p>
+            <p>Select a job below to get started. Upload your .docx/.pdf files and let the agent process them for you.</p>
         </div>
 
         <!-- Job Grid -->
@@ -849,8 +849,8 @@
             <div>
                 <div class="drop-zone" id="dz1" data-target="file">
                     <div class="drop-icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
-                    <h4>Document A</h4><p>Drop .docx</p>
-                    <input type="file" id="fi1" accept=".docx">
+                    <h4>Document A</h4><p>Drop ${job.accept.replace(/,/g, ' / ')}</p>
+                    <input type="file" id="fi1" accept="${job.accept}">
                 </div>
                 <div class="file-info" id="fileInfo1" style="display:none">
                     <div class="fi-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
@@ -861,8 +861,8 @@
             <div>
                 <div class="drop-zone" id="dz2" data-target="file2">
                     <div class="drop-icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
-                    <h4>Document B</h4><p>Drop .docx</p>
-                    <input type="file" id="fi2" accept=".docx">
+                    <h4>Document B</h4><p>Drop ${job.accept.replace(/,/g, ' / ')}</p>
+                    <input type="file" id="fi2" accept="${job.accept}">
                 </div>
                 <div class="file-info" id="fileInfo2" style="display:none">
                     <div class="fi-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
@@ -874,8 +874,8 @@
             } else {
                 html += `<div class="drop-zone" id="dz1" data-target="file">
             <div class="drop-icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
-            <h4>Drop your .docx file here</h4><p>or click to browse — max 50MB</p>
-            <input type="file" id="fi1" accept=".docx">
+            <h4>Drop your file here</h4><p>${job.accept.replace(/,/g, ' / ')} — max 50MB</p>
+            <input type="file" id="fi1" accept="${job.accept}">
         </div>
         <div class="file-info" id="fileInfo1" style="display:none">
             <div class="fi-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
@@ -947,8 +947,9 @@
         }
 
         function handleFile(file, target, num) {
-            if (!file.name.toLowerCase().endsWith('.docx')) {
-                showError('Please select a .docx file'); return;
+            const allowed = (activeJob && activeJob.accept ? activeJob.accept : '.docx,.pdf').split(',').map(e => e.trim());
+            if (!allowed.some(ext => file.name.toLowerCase().endsWith(ext))) {
+                showError(`Please select a supported file: ${allowed.join(' or ')}`); return;
             }
             selectedFiles[target] = file;
             const info = document.getElementById('fileInfo' + num);

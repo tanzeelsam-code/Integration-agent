@@ -3,6 +3,7 @@ flask>=3.0.0
 lxml>=5.0.0
 gunicorn>=23.0.0
 openpyxl>=3.1.0
+pypdf>=4.0.0
 folium>=0.15.0
 geopandas>=0.14.0
 shapely>=2.0.0
