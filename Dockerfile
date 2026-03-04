@@ -2,9 +2,9 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# System deps for geopandas / GDAL
+# System deps for geopandas / GDAL + OCR
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgdal-dev libgeos-dev && \
+    libgdal-dev libgeos-dev tesseract-ocr && \
     rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .

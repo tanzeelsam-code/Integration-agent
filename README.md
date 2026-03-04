@@ -30,6 +30,16 @@ A Python-based AI assistant that processes `.docx`, `.pdf`, and image files acro
 pip install -r requirements.txt
 ```
 
+Optional OCR support for scanned PDFs/images requires the Tesseract binary:
+
+```bash
+# macOS
+brew install tesseract
+
+# Ubuntu/Debian
+sudo apt-get install tesseract-ocr
+```
+
 ### Web UI (Recommended)
 
 ```bash
