@@ -8,10 +8,17 @@ from urllib.parse import quote
 import os
 import uuid
 import tempfile
+from pathlib import Path
 from flask import Flask, render_template, request, send_file, jsonify
+from werkzeug.utils import secure_filename
 
 from formatter.engine import reformat_document
 from jobs import list_jobs, get_job
+from input_adapter import (
+    is_supported_filename,
+    normalize_input_to_docx,
+    supported_extensions_csv,
+)
 from gis.map_engine import generate_full_map, export_map_html
 from gis.data_loader import (
     load_default_data,
@@ -25,23 +32,20 @@ app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50MB max
 UPLOAD_DIR = os.path.join(tempfile.gettempdir(), "integration_agent_uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+SUPPORTED_UPLOADS = supported_extensions_csv()
 
 
-def _pdf_to_docx(pdf_path: str, docx_path: str) -> None:
-    """Extract text from a PDF and write it to a .docx for downstream processing."""
-    from pypdf import PdfReader
-    from docx import Document as DocxDocument
+def _build_download_name(prefix: str, source_filename: str) -> str:
+    stem = Path(secure_filename(source_filename or "document")).stem or "document"
+    return f"{prefix}_{stem}.docx"
 
-    reader = PdfReader(pdf_path)
-    doc = DocxDocument()
-    for page in reader.pages:
-        text = page.extract_text() or ""
-        for line in text.split("\n"):
-            line = line.strip()
-            if line:
-                doc.add_paragraph(line)
-        doc.add_paragraph()
-    doc.save(docx_path)
+
+def _append_conversion_notes(summary: str, notes: list[str]) -> str:
+    filtered = [n for n in notes if n]
+    if not filtered:
+        return summary
+    note_block = "\n".join(f"- {n}" for n in filtered)
+    return f"{summary}\nINPUT CONVERSION NOTES\n{'=' * 40}\n{note_block}\n"
 
 # Shared GIS state (per-process; fine for single-server)
 _custom_geojson_data = None
@@ -163,38 +167,34 @@ def upload():
     if file.filename == "":
         return jsonify({"error": "No file selected"}), 400
 
-    if not file.filename.lower().endswith((".docx", ".pdf")):
-        return jsonify({"error": "Only .docx or .pdf files are supported"}), 400
+    if not is_supported_filename(file.filename):
+        return jsonify({"error": f"Unsupported file type. Supported: {SUPPORTED_UPLOADS}"}), 400
 
     report_name = request.form.get("report_name", "Report")
     year = request.form.get("year", "2026")
     project_number = request.form.get("project_number", "PRJ-001")
 
     job_id = str(uuid.uuid4())[:8]
-    input_ext = ".pdf" if file.filename.lower().endswith(".pdf") else ".docx"
+    input_ext = Path(file.filename).suffix.lower()
     input_path = os.path.join(UPLOAD_DIR, f"{job_id}_input{input_ext}")
+    prepared_input_path = os.path.join(UPLOAD_DIR, f"{job_id}_input_prepared.docx")
     output_path = os.path.join(UPLOAD_DIR, f"{job_id}_output.docx")
 
     file.save(input_path)
-    converted_path = None
-    process_path = input_path
-
-    if input_ext == ".pdf":
-        converted_path = os.path.join(UPLOAD_DIR, f"{job_id}_input_conv.docx")
-        _pdf_to_docx(input_path, converted_path)
-        process_path = converted_path
+    prepared = {"path": input_path, "note": None}
 
     try:
+        prepared = normalize_input_to_docx(input_path, prepared_input_path)
         summary = reformat_document(
-            input_path=process_path,
+            input_path=prepared["path"],
             output_path=output_path,
             report_name=report_name,
             year=year,
             project_number=project_number,
         )
+        summary = _append_conversion_notes(summary, [prepared.get("note")])
 
-        base_name = os.path.splitext(file.filename)[0]
-        out_filename = f"FORMATTED_{base_name}.docx"
+        out_filename = _build_download_name("FORMATTED", file.filename)
 
         return jsonify(
             {
@@ -210,7 +210,7 @@ def upload():
         return jsonify({"error": f"Processing failed: {str(e)}"}), 500
 
     finally:
-        for p in [input_path, converted_path]:
+        for p in [input_path, prepared_input_path]:
             if p and os.path.exists(p):
                 os.remove(p)
 
@@ -242,46 +242,50 @@ def process_job(job_type):
         if file1.filename == "":
             return jsonify({"error": "No file selected"}), 400
 
-    # Validate file extension against job's accepted types
+    # Validate file extension against the job's accepted types
     allowed_exts = [e.strip() for e in job_def.get("accept", ".docx").split(",")]
 
     def _allowed(filename):
-        return any(filename.lower().endswith(ext) for ext in allowed_exts)
+        lower = filename.lower()
+        return any(lower.endswith(ext) for ext in allowed_exts)
 
     if not _allowed(file1.filename):
         return jsonify({"error": f"Unsupported file type. Allowed: {', '.join(allowed_exts)}"}), 400
     if file2 and not _allowed(file2.filename):
         return jsonify({"error": f"Second file must be one of: {', '.join(allowed_exts)}"}), 400
 
-    def _save_ext(filename):
-        return ".pdf" if filename.lower().endswith(".pdf") else ".docx"
+    if not is_supported_filename(file1.filename):
+        return jsonify({"error": f"Unsupported file type. Supported: {SUPPORTED_UPLOADS}"}), 400
+    if file2 and not is_supported_filename(file2.filename):
+        return jsonify({"error": f"Unsupported second file type. Supported: {SUPPORTED_UPLOADS}"}), 400
 
     job_id = str(uuid.uuid4())[:8]
-    ext1 = _save_ext(file1.filename)
+    ext1 = Path(file1.filename).suffix.lower()
     input_path = os.path.join(UPLOAD_DIR, f"{job_id}_input{ext1}")
-    ext2 = _save_ext(file2.filename) if file2 else None
+    prepared_input1 = os.path.join(UPLOAD_DIR, f"{job_id}_input_prepared.docx")
+    ext2 = Path(file2.filename).suffix.lower() if file2 else None
     input_path2 = os.path.join(UPLOAD_DIR, f"{job_id}_input2{ext2}") if file2 else None
+    prepared_input2 = os.path.join(UPLOAD_DIR, f"{job_id}_input2_prepared.docx") if file2 else None
     output_path = os.path.join(UPLOAD_DIR, f"{job_id}_output.docx")
 
     file1.save(input_path)
     if file2:
         file2.save(input_path2)
 
-    # Convert PDF inputs to DOCX so all processors can use python-docx
-    converted = []
     process_path1 = input_path
-    if ext1 == ".pdf":
-        process_path1 = os.path.join(UPLOAD_DIR, f"{job_id}_input_conv.docx")
-        _pdf_to_docx(input_path, process_path1)
-        converted.append(process_path1)
-
     process_path2 = input_path2
-    if file2 and ext2 == ".pdf":
-        process_path2 = os.path.join(UPLOAD_DIR, f"{job_id}_input2_conv.docx")
-        _pdf_to_docx(input_path2, process_path2)
-        converted.append(process_path2)
+    conversion_notes = []
 
     try:
+        prepared1 = normalize_input_to_docx(input_path, prepared_input1)
+        process_path1 = prepared1["path"]
+        conversion_notes.append(prepared1.get("note"))
+
+        if file2 and input_path2 and prepared_input2:
+            prepared2 = normalize_input_to_docx(input_path2, prepared_input2)
+            process_path2 = prepared2["path"]
+            conversion_notes.append(prepared2.get("note"))
+
         params = {}
         for field in job_def.get("fields", []):
             val = request.form.get(field["id"], field.get("default", ""))
@@ -293,9 +297,9 @@ def process_job(job_type):
             summary = processor([process_path1, process_path2], output_path, **params)
         else:
             summary = processor(process_path1, output_path, **params)
+        summary = _append_conversion_notes(summary, conversion_notes)
 
-        prefix = job_type.upper()
-        out_filename = f"{prefix}_{file1.filename.rsplit('.', 1)[0]}.docx"
+        out_filename = _build_download_name(job_type.upper(), file1.filename)
 
         return jsonify(
             {
@@ -314,7 +318,7 @@ def process_job(job_type):
         return jsonify({"error": f"Processing failed: {str(e)}"}), 500
 
     finally:
-        for p in [input_path, input_path2] + converted:
+        for p in [input_path, input_path2, prepared_input1, prepared_input2]:
             if p and os.path.exists(p):
                 os.remove(p)
 
@@ -328,8 +332,9 @@ def download(job_id, filename):
     if not os.path.exists(output_path):
         return jsonify({"error": "File not found or expired"}), 404
 
-    if not filename.lower().endswith(".docx"):
-        filename = filename + ".docx"
+    safe_filename = secure_filename(filename) or f"{job_id}.docx"
+    if not safe_filename.lower().endswith(".docx"):
+        safe_filename = safe_filename + ".docx"
 
     from flask import make_response, after_this_request
 
@@ -347,7 +352,7 @@ def download(job_id, filename):
 
     response = make_response(data)
     response.headers["Content-Type"] = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    response.headers["Content-Disposition"] = f'attachment; filename="{filename}"'
+    response.headers["Content-Disposition"] = f'attachment; filename="{safe_filename}"'
     return response
 
 

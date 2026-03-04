@@ -12,14 +12,18 @@ from .report_writing import process_report
 from .jis_mapping import process_jis_mapping
 from .cv_rewriting import process_cv_rewrite
 from .contract_management import process_contract
+from input_adapter import supported_extensions_csv
+
+
+ACCEPTED_UPLOADS = supported_extensions_csv()
 
 
 JOB_REGISTRY = {
     "formatting": {
         "name": "Document Formatting",
-        "description": "Reformat .docx/.pdf files to AGENT ZEE style guide with full compliance",
+        "description": "Reformat uploaded files to AGENT ZEE style guide with full compliance",
         "icon": "format",
-        "accept": ".docx,.pdf",
+        "accept": ACCEPTED_UPLOADS,
         "multi_file": False,
         "fields": [
             {"id": "report_name", "label": "Report Name", "default": "Report"},
@@ -32,7 +36,7 @@ JOB_REGISTRY = {
         "name": "Proposal Development",
         "description": "Generate structured proposals compliant with WB, EU, and ADB requirements",
         "icon": "proposal",
-        "accept": ".docx,.pdf",
+        "accept": ACCEPTED_UPLOADS,
         "multi_file": False,
         "fields": [
             {"id": "client_type", "label": "Client Type", "type": "select",
@@ -47,7 +51,7 @@ JOB_REGISTRY = {
         "name": "Documentation Analysis",
         "description": "Comprehensive document analysis with readability metrics and quality assessment",
         "icon": "analysis",
-        "accept": ".docx,.pdf",
+        "accept": ACCEPTED_UPLOADS,
         "multi_file": False,
         "fields": [
             {"id": "analysis_depth", "label": "Analysis Depth", "type": "select",
@@ -60,7 +64,7 @@ JOB_REGISTRY = {
         "name": "Document Comparison",
         "description": "Compare two documents side-by-side with structural and content gap analysis",
         "icon": "comparison",
-        "accept": ".docx,.pdf",
+        "accept": ACCEPTED_UPLOADS,
         "multi_file": True,
         "fields": [
             {"id": "comparison_mode", "label": "Comparison Mode", "type": "select",
@@ -73,7 +77,7 @@ JOB_REGISTRY = {
         "name": "Project Management",
         "description": "Generate WBS, Gantt tables, RACI matrix, and risk register from project docs",
         "icon": "project",
-        "accept": ".docx,.pdf",
+        "accept": ACCEPTED_UPLOADS,
         "multi_file": False,
         "fields": [
             {"id": "project_name", "label": "Project Name", "default": ""},
@@ -88,7 +92,7 @@ JOB_REGISTRY = {
         "name": "Report Writing",
         "description": "Transform raw content into professionally structured reports for WB/EU/ADB",
         "icon": "report",
-        "accept": ".docx,.pdf",
+        "accept": ACCEPTED_UPLOADS,
         "multi_file": False,
         "fields": [
             {"id": "report_style", "label": "Report Style", "type": "select",
@@ -104,7 +108,7 @@ JOB_REGISTRY = {
         "name": "JIS Mapping",
         "description": "Generate Results Framework, LogFrame, and M&E mapping from project documents",
         "icon": "jis",
-        "accept": ".docx,.pdf",
+        "accept": ACCEPTED_UPLOADS,
         "multi_file": False,
         "fields": [
             {"id": "framework_type", "label": "Framework Type", "type": "select",
@@ -118,7 +122,7 @@ JOB_REGISTRY = {
         "name": "CV Reception & Rewriting",
         "description": "Reformat CVs to match WB, EU, or ADB client template requirements",
         "icon": "cv",
-        "accept": ".docx,.pdf",
+        "accept": ACCEPTED_UPLOADS,
         "multi_file": False,
         "fields": [
             {"id": "client_template", "label": "Client Template", "type": "select",
@@ -133,7 +137,7 @@ JOB_REGISTRY = {
         "name": "Contract Management",
         "description": "Extract and structure deliverables, payments, timelines, and key clauses from contracts",
         "icon": "contract",
-        "accept": ".docx,.pdf",
+        "accept": ACCEPTED_UPLOADS,
         "multi_file": False,
         "fields": [
             {"id": "client_name", "label": "Client Name", "default": ""},

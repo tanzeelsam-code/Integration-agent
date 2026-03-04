@@ -71,7 +71,9 @@ def _run(r,sz,bold=False,italic=False,color=BLACK):
     r.font.name="Arial"; r.font.size=Pt(sz)
     r.font.bold=bold; r.font.italic=italic; r.font.color.rgb=color
 
-def _heading(doc,text,lvl=1):
+def _heading(doc,text,lvl=1, level=None):
+    if level is not None:
+        lvl = level
     p=doc.add_heading(text,level=lvl)
     for r in p.runs: _run(r,14 if lvl==1 else 12 if lvl==2 else 11,bold=True,color=GREEN)
 

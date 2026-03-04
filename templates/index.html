@@ -753,7 +753,7 @@
         <!-- Hero -->
         <div class="hero">
             <h2>What would you like to do?</h2>
-            <p>Select a job below to get started. Upload your .docx/.pdf files and let the agent process them for you.</p>
+            <p>Select a job below to get started. Upload DOCX, PDF, or image files and let the agent process them for you.</p>
         </div>
 
         <!-- Job Grid -->
@@ -947,7 +947,10 @@
         }
 
         function handleFile(file, target, num) {
-            const allowed = (activeJob && activeJob.accept ? activeJob.accept : '.docx,.pdf').split(',').map(e => e.trim());
+            const allowed = (activeJob && activeJob.accept
+                ? activeJob.accept
+                : '.docx,.pdf,.png,.jpg,.jpeg,.bmp,.gif,.tif,.tiff,.webp'
+            ).split(',').map(e => e.trim());
             if (!allowed.some(ext => file.name.toLowerCase().endsWith(ext))) {
                 showError(`Please select a supported file: ${allowed.join(' or ')}`); return;
             }

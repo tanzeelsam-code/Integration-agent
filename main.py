@@ -16,6 +16,7 @@ Usage:
 import argparse
 import sys
 import os
+import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -28,6 +29,11 @@ from jobs.report_writing import process_report
 from jobs.jis_mapping import process_jis_mapping
 from jobs.cv_rewriting import process_cv_rewrite
 from jobs.contract_management import process_contract
+from input_adapter import (
+    is_supported_filename,
+    normalize_input_to_docx,
+    supported_extensions_csv,
+)
 
 
 BANNER = r"""
@@ -38,67 +44,111 @@ BANNER = r"""
 """
 
 
+def _prepare_input(input_path: str, temp_dir: str, slot: str) -> tuple[str, str | None]:
+    if not is_supported_filename(input_path):
+        raise ValueError(f"Unsupported input type. Supported: {supported_extensions_csv()}")
+
+    converted_path = os.path.join(temp_dir, f"{slot}.docx")
+    prepared = normalize_input_to_docx(input_path, converted_path)
+    return prepared["path"], prepared.get("note")
+
+
+def _append_conversion_notes(summary: str, notes: list[str | None]) -> str:
+    filtered = [n for n in notes if n]
+    if not filtered:
+        return summary
+    note_text = "\n".join(f"- {n}" for n in filtered)
+    return f"{summary}\nINPUT CONVERSION NOTES\n{'=' * 40}\n{note_text}\n"
+
+
 def cmd_format(args):
-    summary = reformat_document(
-        input_path=args.input, output_path=args.output,
-        report_name=args.report, year=args.year, project_number=args.project,
-    )
-    return summary
+    with tempfile.TemporaryDirectory(prefix="integration_cli_") as temp_dir:
+        input_path, note = _prepare_input(args.input, temp_dir, "input1")
+        summary = reformat_document(
+            input_path=input_path, output_path=args.output,
+            report_name=args.report, year=args.year, project_number=args.project,
+        )
+        return _append_conversion_notes(summary, [note])
 
 
 def cmd_proposal(args):
-    return process_proposal(
-        args.input, args.output,
-        client_type=args.client, project_title=args.title, country=args.country,
-    )
+    with tempfile.TemporaryDirectory(prefix="integration_cli_") as temp_dir:
+        input_path, note = _prepare_input(args.input, temp_dir, "input1")
+        summary = process_proposal(
+            input_path, args.output,
+            client_type=args.client, project_title=args.title, country=args.country,
+        )
+        return _append_conversion_notes(summary, [note])
 
 
 def cmd_analyze(args):
-    return process_analysis(args.input, args.output, analysis_depth=args.depth)
+    with tempfile.TemporaryDirectory(prefix="integration_cli_") as temp_dir:
+        input_path, note = _prepare_input(args.input, temp_dir, "input1")
+        summary = process_analysis(input_path, args.output, analysis_depth=args.depth)
+        return _append_conversion_notes(summary, [note])
 
 
 def cmd_compare(args):
-    return process_comparison(
-        [args.input, args.input2], args.output,
-        comparison_mode=args.mode,
-    )
+    with tempfile.TemporaryDirectory(prefix="integration_cli_") as temp_dir:
+        input_path1, note1 = _prepare_input(args.input, temp_dir, "input1")
+        input_path2, note2 = _prepare_input(args.input2, temp_dir, "input2")
+        summary = process_comparison(
+            [input_path1, input_path2], args.output,
+            comparison_mode=args.mode,
+        )
+        return _append_conversion_notes(summary, [note1, note2])
 
 
 def cmd_project(args):
-    return process_project_management(
-        args.input, args.output,
-        project_name=args.name, duration_months=args.duration,
-    )
+    with tempfile.TemporaryDirectory(prefix="integration_cli_") as temp_dir:
+        input_path, note = _prepare_input(args.input, temp_dir, "input1")
+        summary = process_project_management(
+            input_path, args.output,
+            project_name=args.name, duration_months=args.duration,
+        )
+        return _append_conversion_notes(summary, [note])
 
 
 def cmd_report(args):
-    return process_report(
-        args.input, args.output,
-        report_style=args.style, report_title=args.title,
-        include_exec_summary=args.exec_summary,
-    )
+    with tempfile.TemporaryDirectory(prefix="integration_cli_") as temp_dir:
+        input_path, note = _prepare_input(args.input, temp_dir, "input1")
+        summary = process_report(
+            input_path, args.output,
+            report_style=args.style, report_title=args.title,
+            include_exec_summary=args.exec_summary,
+        )
+        return _append_conversion_notes(summary, [note])
 
 
 def cmd_jis(args):
-    return process_jis_mapping(
-        args.input, args.output,
-        framework_type=args.framework, sector=args.sector,
-    )
+    with tempfile.TemporaryDirectory(prefix="integration_cli_") as temp_dir:
+        input_path, note = _prepare_input(args.input, temp_dir, "input1")
+        summary = process_jis_mapping(
+            input_path, args.output,
+            framework_type=args.framework, sector=args.sector,
+        )
+        return _append_conversion_notes(summary, [note])
 
 
 def cmd_cv(args):
-    return process_cv_rewrite(
-        args.input, args.output,
-        client_template=args.client, position_title=args.position,
-        years_experience_required=args.years,
-    )
+    with tempfile.TemporaryDirectory(prefix="integration_cli_") as temp_dir:
+        input_path, note = _prepare_input(args.input, temp_dir, "input1")
+        summary = process_cv_rewrite(
+            input_path, args.output,
+            client_template=args.client, position_title=args.position,
+            years_experience_required=args.years,
+        )
+        return _append_conversion_notes(summary, [note])
 
 
 def cmd_contract(args):
-    return process_contract(
-        args.input, args.output,
-        client_name=args.client_name, contract_type=args.type,
-    )
+    with tempfile.TemporaryDirectory(prefix="integration_cli_") as temp_dir:
+        input_path, note = _prepare_input(args.input, temp_dir, "input1")
+        summary = process_contract(
+            input_path, args.output,
+            client_name=args.client_name, contract_type=args.type,
+        )
+        return _append_conversion_notes(summary, [note])
 
 
 def main():
@@ -107,10 +157,11 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     sub = parser.add_subparsers(dest="command", help="Available jobs")
+    input_help = "Input file (.docx, .pdf, or image)"
 
     # Format
     p = sub.add_parser("format", help="Reformat .docx to INTEGRATION style")
-    p.add_argument("input", help="Input .docx file")
+    p.add_argument("input", help=input_help)
     p.add_argument("-o", "--output", required=True)
     p.add_argument("--report", default="Report")
     p.add_argument("--year", default="2026")
@@ -118,7 +169,7 @@ def main():
 
     # Proposal
     p = sub.add_parser("proposal", help="Generate structured proposal")
-    p.add_argument("input", help="Input .docx (draft/TOR)")
+    p.add_argument("input", help=input_help)
     p.add_argument("-o", "--output", required=True)
     p.add_argument("--client", default="World Bank (WB)")
     p.add_argument("--title", default="")
@@ -126,27 +177,27 @@ def main():
 
     # Analyze
     p = sub.add_parser("analyze", help="Document analysis & quality report")
-    p.add_argument("input", help="Input .docx")
+    p.add_argument("input", help=input_help)
     p.add_argument("-o", "--output", required=True)
     p.add_argument("--depth", default="Standard", choices=["Quick Overview","Standard","Deep Dive"])
 
     # Compare
     p = sub.add_parser("compare", help="Compare two documents")
-    p.add_argument("input", help="First .docx")
-    p.add_argument("input2", help="Second .docx")
+    p.add_argument("input", help="First input file (.docx, .pdf, or image)")
+    p.add_argument("input2", help="Second input file (.docx, .pdf, or image)")
     p.add_argument("-o", "--output", required=True)
     p.add_argument("--mode", default="Full Comparison")
 
     # Project
     p = sub.add_parser("project", help="Generate project management docs")
-    p.add_argument("input", help="Input .docx")
+    p.add_argument("input", help=input_help)
     p.add_argument("-o", "--output", required=True)
     p.add_argument("--name", default="Untitled Project")
     p.add_argument("--duration", default="12")
 
     # Report
     p = sub.add_parser("report", help="Professional report writing")
-    p.add_argument("input", help="Input .docx (raw content)")
+    p.add_argument("input", help=input_help)
     p.add_argument("-o", "--output", required=True)
     p.add_argument("--style", default="Generic Professional")
     p.add_argument("--title", default="Report")
@@ -154,14 +205,14 @@ def main():
 
     # JIS
     p = sub.add_parser("jis", help="JIS mapping (LogFrame, Results Framework)")
-    p.add_argument("input", help="Input .docx")
+    p.add_argument("input", help=input_help)
     p.add_argument("-o", "--output", required=True)
     p.add_argument("--framework", default="Full Package")
     p.add_argument("--sector", default="Energy")
 
     # CV
     p = sub.add_parser("cv", help="CV rewriting for WB/EU/ADB")
-    p.add_argument("input", help="Input CV .docx")
+    p.add_argument("input", help=input_help)
     p.add_argument("-o", "--output", required=True)
     p.add_argument("--client", default="World Bank (WB)")
     p.add_argument("--position", default="")
@@ -169,7 +220,7 @@ def main():
 
     # Contract
     p = sub.add_parser("contract", help="Extract and manage contract details")
-    p.add_argument("input", help="Input contract .docx")
+    p.add_argument("input", help=input_help)
     p.add_argument("-o", "--output", required=True)
     p.add_argument("--client-name", default="Unknown Client")
     p.add_argument("--type", default="Standard Consulting")

@@ -2,7 +2,7 @@
 
 **Multi-job document processing for international development consulting (WB, EU, ADB)**
 
-A Python-based AI assistant that processes `.docx` and `.pdf` documents across specialized jobs — from formatting and analysis to proposal generation and CV rewriting.
+A Python-based AI assistant that processes `.docx`, `.pdf`, and image files across specialized jobs — from formatting and analysis to proposal generation and CV rewriting.
 
 ---
 
@@ -10,7 +10,7 @@ A Python-based AI assistant that processes `.docx` and `.pdf` documents across s
 
 | # | Job | Description |
 |---|-----|-------------|
-| 1 | **Document Formatting** | Reformat `.docx`/`.pdf` files to INTEGRATION style guide with full compliance |
+| 1 | **Document Formatting** | Reformat uploaded files (`.docx`, `.pdf`, images) to INTEGRATION style guide with full compliance |
 | 2 | **Proposal Development** | Generate structured proposals compliant with WB, EU, ADB requirements |
 | 3 | **Documentation Analysis** | Readability metrics, structure breakdown, quality scoring |
 | 4 | **Document Comparison** | Compare two documents with structural & content gap analysis |
@@ -18,6 +18,7 @@ A Python-based AI assistant that processes `.docx` and `.pdf` documents across s
 | 6 | **Report Writing** | Transform raw content into professional WB/EU/ADB reports |
 | 7 | **JIS Mapping** | Results Framework, LogFrame, and M&E mapping matrix |
 | 8 | **CV Reception & Rewriting** | Reformat CVs to WB, EU, or ADB template requirements |
+| 9 | **Contract Management** | Extract and structure contract deliverables, payments, timelines, and clauses |
 
 ---
 
@@ -70,7 +71,7 @@ python main.py cv resume.docx -o cv_wb.docx --client "World Bank (WB)" --positio
 
 ```
 integration-agent/
-├── main.py              # CLI entry point (8 subcommands)
+├── main.py              # CLI entry point (9 subcommands)
 ├── app.py               # Flask web UI (multi-job dashboard)
 ├── formatter/           # Document formatting engine
 │   ├── constants.py     # Colour palette, typography, layout constants
@@ -90,7 +91,8 @@ integration-agent/
 │   ├── project_management.py
 │   ├── report_writing.py
 │   ├── jis_mapping.py
-│   └── cv_rewriting.py
+│   ├── cv_rewriting.py
+│   └── contract_management.py
 ├── templates/
 │   └── index.html       # Multi-job dashboard UI
 ├── requirements.txt
