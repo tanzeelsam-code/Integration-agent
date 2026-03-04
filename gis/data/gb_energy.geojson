@@ -1,0 +1,284 @@
+{
+  "type": "FeatureCollection",
+  "name": "Gilgit-Baltistan Energy Infrastructure",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Diamer-Basha Dam",
+        "layer": "hydropower",
+        "status": "Under Construction",
+        "capacity_mw": 4500,
+        "description": "Major hydropower project on the Indus River. Expected completion 2028-2029.",
+        "district": "Diamer"
+      },
+      "geometry": { "type": "Point", "coordinates": [73.905, 35.528] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Bunji Hydropower",
+        "layer": "hydropower",
+        "status": "Planned",
+        "capacity_mw": 7100,
+        "description": "Largest planned hydropower project in GB on the Indus River.",
+        "district": "Astore"
+      },
+      "geometry": { "type": "Point", "coordinates": [74.633, 35.667] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Gilgit KIU Hydropower",
+        "layer": "hydropower",
+        "status": "Operational",
+        "capacity_mw": 2.2,
+        "description": "Small hydropower station near Karakoram International University.",
+        "district": "Gilgit"
+      },
+      "geometry": { "type": "Point", "coordinates": [74.492, 35.919] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Naltar Hydropower",
+        "layer": "hydropower",
+        "status": "Operational",
+        "capacity_mw": 13.8,
+        "description": "Run-of-river hydropower station in Naltar Valley.",
+        "district": "Gilgit"
+      },
+      "geometry": { "type": "Point", "coordinates": [74.178, 36.168] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hassanabad Small Hydro",
+        "layer": "hydropower",
+        "status": "Operational",
+        "capacity_mw": 4.2,
+        "description": "Community-managed micro hydropower project in Hunza.",
+        "district": "Hunza"
+      },
+      "geometry": { "type": "Point", "coordinates": [74.572, 36.310] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Skardu Solar Zone",
+        "layer": "solar",
+        "status": "Identified",
+        "capacity_mw": 50,
+        "description": "High-altitude solar PV potential zone — average 5.5 kWh/m²/day irradiance.",
+        "district": "Skardu"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [75.50, 35.25], [75.65, 35.25], [75.65, 35.35],
+          [75.50, 35.35], [75.50, 35.25]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Gilgit Valley Solar Zone",
+        "layer": "solar",
+        "status": "Identified",
+        "capacity_mw": 30,
+        "description": "Solar potential zone in the main Gilgit valley floor.",
+        "district": "Gilgit"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [74.28, 35.88], [74.52, 35.88], [74.52, 35.95],
+          [74.28, 35.95], [74.28, 35.88]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Deosai Plateau Solar Zone",
+        "layer": "solar",
+        "status": "Proposed",
+        "capacity_mw": 100,
+        "description": "High-altitude plateau with exceptional solar resource — 6+ kWh/m²/day.",
+        "district": "Skardu"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [75.30, 34.95], [75.60, 34.95], [75.60, 35.10],
+          [75.30, 35.10], [75.30, 34.95]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Khunjerab Wind Corridor",
+        "layer": "wind",
+        "status": "Identified",
+        "capacity_mw": 20,
+        "description": "High-altitude wind corridor near the Khunjerab Pass with consistent westerlies.",
+        "district": "Hunza"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [75.42, 36.85], [75.35, 36.80], [75.28, 36.75], [75.20, 36.70]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Shandur Wind Corridor",
+        "layer": "wind",
+        "status": "Identified",
+        "capacity_mw": 15,
+        "description": "Mountain pass wind corridor at Shandur (~3,700m elevation).",
+        "district": "Ghizer"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [72.55, 36.08], [72.60, 36.05], [72.65, 36.02]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Babusar Wind Corridor",
+        "layer": "wind",
+        "status": "Proposed",
+        "capacity_mw": 10,
+        "description": "Wind potential along the Babusar Pass corridor.",
+        "district": "Diamer"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [74.05, 35.20], [74.00, 35.18], [73.95, 35.15]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "KKH Transmission Line",
+        "layer": "grid",
+        "status": "Operational",
+        "voltage_kv": 132,
+        "description": "Main 132kV transmission line along the Karakoram Highway from Gilgit to Sost."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [74.31, 35.92], [74.40, 36.05], [74.55, 36.31],
+          [74.66, 36.45], [74.83, 36.63], [75.05, 36.73]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Gilgit-Skardu Transmission Line",
+        "layer": "grid",
+        "status": "Planned",
+        "voltage_kv": 220,
+        "description": "Proposed 220kV transmission line connecting Gilgit to Skardu."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [74.31, 35.92], [74.60, 35.75], [75.00, 35.55], [75.54, 35.30]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Gilgit District",
+        "layer": "boundaries",
+        "population": 330000,
+        "area_km2": 4235
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [73.80, 35.60], [74.80, 35.60], [74.80, 36.30],
+          [73.80, 36.30], [73.80, 35.60]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Skardu District",
+        "layer": "boundaries",
+        "population": 350000,
+        "area_km2": 15040
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [74.80, 34.80], [76.20, 34.80], [76.20, 35.60],
+          [74.80, 35.60], [74.80, 34.80]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunza District",
+        "layer": "boundaries",
+        "population": 130000,
+        "area_km2": 10101
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [74.20, 36.20], [75.80, 36.20], [75.80, 37.10],
+          [74.20, 37.10], [74.20, 36.20]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Diamer District",
+        "layer": "boundaries",
+        "population": 250000,
+        "area_km2": 10936
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [73.20, 35.00], [74.20, 35.00], [74.20, 35.70],
+          [73.20, 35.70], [73.20, 35.00]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Ghizer District",
+        "layer": "boundaries",
+        "population": 180000,
+        "area_km2": 12680
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [72.20, 35.80], [73.80, 35.80], [73.80, 36.60],
+          [72.20, 36.60], [72.20, 35.80]
+        ]]
+      }
+    }
+  ]
+}
