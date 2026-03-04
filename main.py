@@ -27,6 +27,7 @@ from jobs.project_management import process_project_management
 from jobs.report_writing import process_report
 from jobs.jis_mapping import process_jis_mapping
 from jobs.cv_rewriting import process_cv_rewrite
+from jobs.contract_management import process_contract
 
 
 BANNER = r"""
@@ -90,6 +91,13 @@ def cmd_cv(args):
         args.input, args.output,
         client_template=args.client, position_title=args.position,
         years_experience_required=args.years,
+    )
+
+
+def cmd_contract(args):
+    return process_contract(
+        args.input, args.output,
+        client_name=args.client_name, contract_type=args.type,
     )
 
 
@@ -159,6 +167,13 @@ def main():
     p.add_argument("--position", default="")
     p.add_argument("--years", default="10")
 
+    # Contract
+    p = sub.add_parser("contract", help="Extract and manage contract details")
+    p.add_argument("input", help="Input contract .docx")
+    p.add_argument("-o", "--output", required=True)
+    p.add_argument("--client-name", default="Unknown Client")
+    p.add_argument("--type", default="Standard Consulting")
+
     args = parser.parse_args()
     if not args.command:
         parser.print_help()
@@ -175,7 +190,7 @@ def main():
     handlers = {
         "format": cmd_format, "proposal": cmd_proposal, "analyze": cmd_analyze,
         "compare": cmd_compare, "project": cmd_project, "report": cmd_report,
-        "jis": cmd_jis, "cv": cmd_cv,
+        "jis": cmd_jis, "cv": cmd_cv, "contract": cmd_contract,
     }
 
     try:

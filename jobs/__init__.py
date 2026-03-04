@@ -10,6 +10,7 @@ from .project_management import process_project_management
 from .report_writing import process_report
 from .jis_mapping import process_jis_mapping
 from .cv_rewriting import process_cv_rewrite
+from .contract_management import process_contract
 
 
 JOB_REGISTRY = {
@@ -126,6 +127,20 @@ JOB_REGISTRY = {
             {"id": "years_experience_required", "label": "Min. Years Experience", "default": "10"},
         ],
         "processor": process_cv_rewrite,
+    },
+    "contract": {
+        "name": "Contract Management",
+        "description": "Extract and structure deliverables, payments, timelines, and key clauses from contracts",
+        "icon": "contract",
+        "accept": ".docx",
+        "multi_file": False,
+        "fields": [
+            {"id": "client_name", "label": "Client Name", "default": ""},
+            {"id": "contract_type", "label": "Contract Type", "type": "select",
+             "options": ["Standard Consulting", "Framework Agreement", "Supply Contract", "Other"],
+             "default": "Standard Consulting"},
+        ],
+        "processor": process_contract,
     },
 }
 
