@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GIS Map — Formating AI Assistance</title>
-    <meta name="description" content="Interactive GIS map for Gilgit-Baltistan Energy Master Plan — visualize hydropower, solar, wind, and grid infrastructure.">
+    <meta name="description"
+        content="Interactive GIS map for Gilgit-Baltistan Energy Master Plan — visualize hydropower, solar, wind, and grid infrastructure.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
@@ -29,7 +30,11 @@
             --sidebar-width: 320px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -132,8 +137,14 @@
             padding: 16px 20px;
         }
 
-        .sidebar-body::-webkit-scrollbar { width: 4px; }
-        .sidebar-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        .sidebar-body::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar-body::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
 
         .section-title {
             font-size: 10px;
@@ -145,7 +156,9 @@
             margin-top: 20px;
         }
 
-        .section-title:first-child { margin-top: 0; }
+        .section-title:first-child {
+            margin-top: 0;
+        }
 
         /* Layer toggles */
         .layer-item {
@@ -159,7 +172,9 @@
             margin-bottom: 4px;
         }
 
-        .layer-item:hover { background: var(--bg-card); }
+        .layer-item:hover {
+            background: var(--bg-card);
+        }
 
         .layer-dot {
             width: 10px;
@@ -223,12 +238,12 @@
             transition: all 0.3s;
         }
 
-        .layer-toggle input:checked + .toggle-slider {
+        .layer-toggle input:checked+.toggle-slider {
             background: var(--green-haze);
             border-color: var(--green-haze);
         }
 
-        .layer-toggle input:checked + .toggle-slider::before {
+        .layer-toggle input:checked+.toggle-slider::before {
             transform: translateX(18px);
             background: white;
         }
@@ -262,7 +277,9 @@
             color: var(--text-muted);
         }
 
-        .upload-zone input { display: none; }
+        .upload-zone input {
+            display: none;
+        }
 
         /* Stats */
         .stats-grid {
@@ -363,7 +380,11 @@
             margin-bottom: 16px;
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
         .map-loading p {
             font-size: 14px;
@@ -387,7 +408,7 @@
             cursor: pointer;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
         }
 
         /* Toast notification */
@@ -402,7 +423,7 @@
             font-size: 13px;
             color: var(--text-primary);
             z-index: 2000;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
             transform: translateY(100px);
             opacity: 0;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -424,11 +445,17 @@
                 z-index: 1500;
             }
 
-            .sidebar.open { transform: translateX(0); }
+            .sidebar.open {
+                transform: translateX(0);
+            }
 
-            .sidebar-toggle { display: flex; }
+            .sidebar-toggle {
+                display: flex;
+            }
 
-            .map-container { width: 100vw; }
+            .map-container {
+                width: 100vw;
+            }
         }
     </style>
 </head>
@@ -443,8 +470,9 @@
             <div class="sidebar-brand">
                 <div class="sidebar-logo">
                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" fill="none" stroke="white" stroke-width="2"/>
-                        <circle cx="12" cy="10" r="3" fill="none" stroke="white" stroke-width="2"/>
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" fill="none" stroke="white"
+                            stroke-width="2" />
+                        <circle cx="12" cy="10" r="3" fill="none" stroke="white" stroke-width="2" />
                     </svg>
                 </div>
                 <div>
@@ -480,8 +508,10 @@
             <div class="section-title">Import Data</div>
             <div class="upload-zone" id="uploadZone">
                 <i class="fa fa-upload"></i>
-                <p>Drop .geojson file or click to browse</p>
-                <input type="file" id="geojsonInput" accept=".geojson,.json">
+                <p>Drop GIS data file or click to browse</p>
+                <p style="font-size:10px;color:var(--text-muted);margin-top:4px">.geojson · .kml · .kmz · .zip
+                    (Shapefile) · .csv · .gpx</p>
+                <input type="file" id="geojsonInput" accept=".geojson,.json,.kml,.kmz,.zip,.csv,.gpx">
             </div>
         </div>
 
@@ -528,9 +558,9 @@
         // ─── Layer config (matches backend) ───
         const LAYER_CONFIG = {
             hydropower: { name: 'Hydropower Plants', color: '#2196F3', icon: 'fa-tint', default: true },
-            solar:      { name: 'Solar Potential Zones', color: '#FFC107', icon: 'fa-sun-o', default: true },
-            wind:       { name: 'Wind Corridors', color: '#E91E63', icon: 'fa-flag', default: true },
-            grid:       { name: 'Transmission Grid', color: '#FF5722', icon: 'fa-bolt', default: false },
+            solar: { name: 'Solar Potential Zones', color: '#FFC107', icon: 'fa-sun-o', default: true },
+            wind: { name: 'Wind Corridors', color: '#E91E63', icon: 'fa-flag', default: true },
+            grid: { name: 'Transmission Grid', color: '#FF5722', icon: 'fa-bolt', default: false },
             boundaries: { name: 'District Boundaries', color: '#78909C', icon: 'fa-map', default: false },
         };
 
@@ -627,8 +657,8 @@
         });
 
         async function uploadGeoJSON(file) {
-            if (!file.name.match(/\.(geojson|json)$/i)) {
-                showToast('⚠️ Please select a .geojson or .json file');
+            if (!file.name.match(/\.(geojson|json|kml|kmz|zip|csv|gpx)$/i)) {
+                showToast('⚠️ Supported: .geojson, .kml, .kmz, .zip, .csv, .gpx');
                 return;
             }
 
@@ -644,7 +674,7 @@
                     return;
                 }
 
-                showToast(`✅ Loaded ${data.features_count} features from ${file.name}`);
+                showToast(`✅ Loaded ${data.features_count} features from ${file.name} (${data.format || 'GeoJSON'})`);
                 await loadMap();
             } catch (err) {
                 showToast('❌ Upload failed');

@@ -100,8 +100,11 @@ def api_generate_map():
 
 @app.route("/api/map/upload", methods=["POST"])
 def api_upload_geojson():
-    """Upload a custom GeoJSON file to overlay on the map."""
+    """Upload a GIS data file to overlay on the map.
+    Supports: GeoJSON, KML, KMZ, Shapefile (ZIP), CSV (lat/lon), GPX.
+    """
     global _custom_geojson_data
+    from gis.format_converter import convert_to_geojson, is_supported_gis_file
 
     if "file" not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
@@ -110,16 +113,19 @@ def api_upload_geojson():
     if file.filename == "":
         return jsonify({"error": "No file selected"}), 400
 
-    if not file.filename.lower().endswith((".geojson", ".json")):
-        return jsonify({"error": "Only .geojson or .json files are supported"}), 400
+    if not is_supported_gis_file(file.filename):
+        return jsonify({
+            "error": "Unsupported format. Accepted: .geojson, .json, .kml, .kmz, .zip (Shapefile), .csv, .gpx"
+        }), 400
 
     try:
-        raw = file.read().decode("utf-8")
-        data = load_geojson_from_string(raw)
+        file_bytes = file.read()
+        data, fmt = convert_to_geojson(file_bytes, file.filename)
 
         # Merge uploaded features with defaults
         default = load_default_data()
-        merged_features = default.get("features", []) + data.get("features", [])
+        new_features = data.get("features", []) if data.get("type") == "FeatureCollection" else [data]
+        merged_features = default.get("features", []) + new_features
         _custom_geojson_data = {
             "type": "FeatureCollection",
             "features": merged_features,
@@ -128,13 +134,14 @@ def api_upload_geojson():
         return jsonify(
             {
                 "success": True,
-                "features_count": len(data.get("features", [])),
+                "format": fmt,
+                "features_count": len(new_features),
                 "total_features": len(merged_features),
                 "layers": get_available_layers(_custom_geojson_data),
             }
         )
-    except (ValueError, UnicodeDecodeError) as e:
-        return jsonify({"error": f"Invalid GeoJSON: {str(e)}"}), 400
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
         return jsonify({"error": f"Upload failed: {str(e)}"}), 500
 
