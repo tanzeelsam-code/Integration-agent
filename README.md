@@ -19,6 +19,7 @@ A Python-based AI assistant that processes `.docx`, `.pdf`, and image files acro
 | 7 | **JIS Mapping** | Results Framework, LogFrame, and M&E mapping matrix |
 | 8 | **CV Reception & Rewriting** | Reformat CVs to WB, EU, or ADB template requirements |
 | 9 | **Contract Management** | Extract and structure contract deliverables, payments, timelines, and clauses |
+| 10 | **GIS Coordinate Extraction** | Extract coordinates from content and export GIS-ready CSV |
 
 ---
 
@@ -73,6 +74,9 @@ python main.py jis project.docx -o jis.docx --framework "Full Package" --sector 
 
 # CV Rewriting
 python main.py cv resume.docx -o cv_wb.docx --client "World Bank (WB)" --position "Team Leader"
+
+# GIS Coordinate Extraction
+python main.py gis survey.pdf -o points.csv
 ```
 
 ---
@@ -81,7 +85,7 @@ python main.py cv resume.docx -o cv_wb.docx --client "World Bank (WB)" --positio
 
 ```
 integration-agent/
-├── main.py              # CLI entry point (9 subcommands)
+├── main.py              # CLI entry point (10 subcommands)
 ├── app.py               # Flask web UI (multi-job dashboard)
 ├── formatter/           # Document formatting engine
 │   ├── constants.py     # Colour palette, typography, layout constants
@@ -102,7 +106,8 @@ integration-agent/
 │   ├── report_writing.py
 │   ├── jis_mapping.py
 │   ├── cv_rewriting.py
-│   └── contract_management.py
+│   ├── contract_management.py
+│   └── gis_extraction.py
 ├── templates/
 │   └── index.html       # Multi-job dashboard UI
 ├── requirements.txt
