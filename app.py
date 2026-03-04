@@ -161,6 +161,39 @@ def api_export_map():
         return jsonify({"error": f"Export failed: {str(e)}"}), 500
 
 
+@app.route("/api/upload_chunk", methods=["POST"])
+def upload_chunk():
+    """Endpoint to handle chunked file uploads to bypass 32MB Cloud Run limits."""
+    if "file" not in request.files:
+        return jsonify({"error": "No file chunk provided"}), 400
+
+    chunk = request.files["file"]
+    job_id = request.form.get("job_id")
+    chunk_index = int(request.form.get("chunk_index", 0))
+    total_chunks = int(request.form.get("total_chunks", 1))
+    filename = request.form.get("filename", "document.docx")
+    
+    if not job_id:
+        return jsonify({"error": "Missing job_id parameter"}), 400
+
+    safe_filename = secure_filename(filename)
+    chunk_path = os.path.join(UPLOAD_DIR, f"{job_id}_chunked_{safe_filename}")
+
+    # Append chunk data to the target file
+    mode = "ab" if chunk_index > 0 else "wb"
+    try:
+        with open(chunk_path, mode) as f:
+            f.write(chunk.read())
+            
+        return jsonify({
+            "success": True, 
+            "message": f"Chunk {chunk_index + 1}/{total_chunks} received.",
+            "job_id": job_id
+        })
+    except Exception as e:
+        return jsonify({"error": f"Failed to save chunk: {str(e)}"}), 500
+
+
 @app.route("/upload", methods=["POST"])
 def upload():
     """Legacy endpoint — Document Formatting job."""
@@ -228,19 +261,48 @@ def process_job(job_type):
     if job_type == "formatting":
         return upload()
 
+    # File handling
+    chunked_job_id1 = request.form.get("chunked_job_id1")
+    chunked_filename1 = request.form.get("chunked_filename1")
+    chunked_job_id2 = request.form.get("chunked_job_id2")
+    chunked_filename2 = request.form.get("chunked_filename2")
+
+    file1 = None
+    file1_name = ""
+    file2 = None
+    file2_name = ""
+
     if job_def.get("multi_file"):
-        if "file" not in request.files or "file2" not in request.files:
-            return jsonify({"error": "Two files required for comparison"}), 400
-        file1 = request.files["file"]
-        file2 = request.files["file2"]
-        if not file1.filename or not file2.filename:
+        if not chunked_job_id1 and "file" not in request.files:
+            return jsonify({"error": "First file required for comparison"}), 400
+        if not chunked_job_id2 and "file2" not in request.files:
+            return jsonify({"error": "Second file required for comparison"}), 400
+            
+        if not chunked_job_id1:
+            file1 = request.files["file"]
+            file1_name = file1.filename
+        else:
+            file1_name = chunked_filename1
+            
+        if not chunked_job_id2:
+            file2 = request.files["file2"]
+            file2_name = file2.filename
+        else:
+            file2_name = chunked_filename2
+            
+        if not file1_name or not file2_name:
             return jsonify({"error": "Both files must be selected"}), 400
     else:
-        if "file" not in request.files:
+        if not chunked_job_id1 and "file" not in request.files:
             return jsonify({"error": "No file uploaded"}), 400
-        file1 = request.files["file"]
-        file2 = None
-        if file1.filename == "":
+            
+        if not chunked_job_id1:
+            file1 = request.files["file"]
+            file1_name = file1.filename
+        else:
+            file1_name = chunked_filename1
+            
+        if not file1_name:
             return jsonify({"error": "No file selected"}), 400
 
     allowed_exts = [e.strip() for e in job_def.get("accept", ".docx").split(",")]
@@ -249,23 +311,23 @@ def process_job(job_type):
         lower = filename.lower()
         return any(lower.endswith(ext) for ext in allowed_exts)
 
-    if not _allowed(file1.filename):
+    if not _allowed(file1_name):
         return jsonify({"error": f"Unsupported file type. Allowed: {', '.join(allowed_exts)}"}), 400
-    if file2 and not _allowed(file2.filename):
+    if file2_name and not _allowed(file2_name):
         return jsonify({"error": f"Second file must be one of: {', '.join(allowed_exts)}"}), 400
 
-    if not is_supported_filename(file1.filename):
+    if not is_supported_filename(file1_name):
         return jsonify({"error": f"Unsupported file type. Supported: {SUPPORTED_UPLOADS}"}), 400
-    if file2 and not is_supported_filename(file2.filename):
+    if file2_name and not is_supported_filename(file2_name):
         return jsonify({"error": f"Unsupported second file type. Supported: {SUPPORTED_UPLOADS}"}), 400
 
     job_id = str(uuid.uuid4())[:8]
-    ext1 = Path(file1.filename).suffix.lower()
+    ext1 = Path(file1_name).suffix.lower()
     input_path = os.path.join(UPLOAD_DIR, f"{job_id}_input{ext1}")
     prepared_input1 = os.path.join(UPLOAD_DIR, f"{job_id}_input_prepared.docx")
 
-    if file2:
-        ext2 = Path(file2.filename).suffix.lower()
+    if file2_name:
+        ext2 = Path(file2_name).suffix.lower()
         input_path2 = os.path.join(UPLOAD_DIR, f"{job_id}_input2{ext2}")
         prepared_input2 = os.path.join(UPLOAD_DIR, f"{job_id}_input2_prepared.docx")
     else:
@@ -275,9 +337,25 @@ def process_job(job_type):
     output_ext = ".csv" if job_type == "gis" else ".docx"
     output_path = os.path.join(UPLOAD_DIR, f"{job_id}_output{output_ext}")
 
-    file1.save(input_path)
-    if file2 and input_path2:
-        file2.save(input_path2)
+    if chunked_job_id1:
+        # Move chunked file to designated input path
+        chunk_source = os.path.join(UPLOAD_DIR, f"{chunked_job_id1}_chunked_{secure_filename(chunked_filename1)}")
+        if os.path.exists(chunk_source):
+            os.rename(chunk_source, input_path)
+        else:
+            return jsonify({"error": "Chunked upload file 1 not found"}), 400
+    else:
+        file1.save(input_path)
+        
+    if file2_name and input_path2:
+        if chunked_job_id2:
+            chunk_source2 = os.path.join(UPLOAD_DIR, f"{chunked_job_id2}_chunked_{secure_filename(chunked_filename2)}")
+            if os.path.exists(chunk_source2):
+                os.rename(chunk_source2, input_path2)
+            else:
+                return jsonify({"error": "Chunked upload file 2 not found"}), 400
+        else:
+            file2.save(input_path2)
 
     process_path1 = input_path
     process_path2 = input_path2
@@ -304,7 +382,7 @@ def process_job(job_type):
             summary = processor(process_path1, output_path, **params)
 
         summary = _append_conversion_notes(summary, conversion_notes)
-        out_filename = _build_download_name(job_type.upper(), file1.filename, output_ext)
+        out_filename = _build_download_name(job_type.upper(), file1_name, output_ext)
 
         return jsonify(
             {

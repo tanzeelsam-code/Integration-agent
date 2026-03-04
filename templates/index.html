@@ -967,9 +967,7 @@
                 showError(`Please select a supported file: ${allowed.join(' or ')}`); return;
             }
 
-            if (file.size > 32 * 1024 * 1024) {
-                showError(`File is too large (${(file.size / 1024 / 1024).toFixed(1)} MB). The maximum size allowed by Cloud Run is 32 MB.`); return;
-            }
+            // File size limits removed via chunked uploads
             selectedFiles[target] = file;
             const info = document.getElementById('fileInfo' + num);
             const dz = document.getElementById('dz' + num);
@@ -1006,31 +1004,81 @@
         }
 
         // ── Process ──
+        async function uploadChunked(file, onProgress) {
+            const chunkSize = 5 * 1024 * 1024; // 5MB
+            const totalChunks = Math.ceil(file.size / chunkSize);
+            const jobId = Math.random().toString(36).substring(2, 10);
+
+            for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+                const start = chunkIndex * chunkSize;
+                const end = Math.min(start + chunkSize, file.size);
+                const chunk = file.slice(start, end);
+
+                const fd = new FormData();
+                fd.append('file', chunk);
+                fd.append('job_id', jobId);
+                fd.append('chunk_index', chunkIndex);
+                fd.append('total_chunks', totalChunks);
+                fd.append('filename', file.name);
+
+                if (onProgress) onProgress(chunkIndex + 1, totalChunks);
+
+                const res = await fetch('/api/upload_chunk', { method: 'POST', body: fd });
+                if (!res.ok) throw new Error('Chunk upload failed');
+            }
+            return { jobId, filename: file.name };
+        }
+
         async function processDocument() {
             if (!activeJob) return;
             const btn = document.getElementById('processBtn');
             const prog = document.getElementById('progressBar');
+            const progText = prog.querySelector('p');
             const res = document.getElementById('result');
             const err = document.getElementById('errorBox');
 
             btn.disabled = true;
             prog.classList.add('active');
+            progText.textContent = 'Preparing...';
             res.classList.remove('active');
             err.classList.remove('active');
 
-            const fd = new FormData();
-            fd.append('file', selectedFiles.file);
-            if (activeJob.multi_file && selectedFiles.file2) {
-                fd.append('file2', selectedFiles.file2);
-            }
-            for (const f of (activeJob.fields || [])) {
-                const el = document.getElementById('field_' + f.id);
-                if (el) fd.append(f.id, el.value);
-            }
-
-            const endpoint = activeJob.id === 'formatting' ? '/upload' : `/process/${activeJob.id}`;
-
             try {
+                const fd = new FormData();
+                const threshold = 10 * 1024 * 1024; // 10MB
+
+                if (selectedFiles.file) {
+                    if (selectedFiles.file.size > threshold) {
+                        const chunked = await uploadChunked(selectedFiles.file, (c, t) => {
+                            progText.textContent = `Uploading File 1 (${c}/${t} chunks)...`;
+                        });
+                        fd.append('chunked_job_id1', chunked.jobId);
+                        fd.append('chunked_filename1', chunked.filename);
+                    } else {
+                        fd.append('file', selectedFiles.file);
+                    }
+                }
+
+                if (activeJob.multi_file && selectedFiles.file2) {
+                    if (selectedFiles.file2.size > threshold) {
+                        const chunked = await uploadChunked(selectedFiles.file2, (c, t) => {
+                            progText.textContent = `Uploading File 2 (${c}/${t} chunks)...`;
+                        });
+                        fd.append('chunked_job_id2', chunked.jobId);
+                        fd.append('chunked_filename2', chunked.filename);
+                    } else {
+                        fd.append('file2', selectedFiles.file2);
+                    }
+                }
+
+                for (const f of (activeJob.fields || [])) {
+                    const el = document.getElementById('field_' + f.id);
+                    if (el) fd.append(f.id, el.value);
+                }
+
+                progText.textContent = 'Processing...';
+                const endpoint = activeJob.id === 'formatting' ? '/upload' : `/process/${activeJob.id}`;
+
                 const r = await fetch(endpoint, { method: 'POST', body: fd });
                 const data = await r.json();
                 prog.classList.remove('active');
@@ -1042,9 +1090,10 @@
                 document.getElementById('resultSubtitle').textContent = `${activeJob.name} completed successfully.`;
                 res.classList.add('active');
                 btn.disabled = false;
+
             } catch (e) {
                 prog.classList.remove('active');
-                showError('Network error — please try again.');
+                showError('Processing failed — ' + e.message);
                 btn.disabled = false;
             }
         }
