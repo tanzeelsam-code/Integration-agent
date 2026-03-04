@@ -210,9 +210,6 @@
             background: rgba(236, 72, 153, 0.15);
         }
 
-        .job-icon.jis {
-            background: rgba(16, 185, 129, 0.15);
-        }
 
         .job-icon.cv {
             background: rgba(249, 115, 22, 0.15);
@@ -757,7 +754,8 @@
         <!-- Hero -->
         <div class="hero">
             <h2>What would you like to do?</h2>
-            <p>Select a job below to get started. Upload DOCX, PDF, or image files and let the agent process them for you.</p>
+            <p>Select a job below to get started. Upload DOCX, PDF, or image files and let the agent process them for
+                you.</p>
         </div>
 
         <!-- Job Grid -->
@@ -784,7 +782,7 @@
     <script>
         const ICONS = {
             format: '📄', proposal: '📋', analysis: '🔍', comparison: '⚖️',
-            project: '📊', report: '✍️', jis: '🗺️', cv: '👤', contract: '📜', gis: '🌍'
+            project: '📊', report: '✍️', cv: '👤', contract: '📜', gis: '🌍'
         };
 
         let jobs = [];
@@ -804,14 +802,23 @@
 
         function renderGrid() {
             const grid = document.getElementById('jobGrid');
-            grid.innerHTML = jobs.map(j => `
+            grid.innerHTML = jobs.map(j => {
+                if (j.link) {
+                    return `
+        <div class="job-card" onclick="window.location.href='${j.link}'" style="cursor:pointer;border-color:rgba(0,153,89,0.3)">
+            <div class="job-icon ${j.icon}">${ICONS[j.icon] || '📁'}</div>
+            <h3>${j.name}</h3>
+            <p>${j.description}</p>
+        </div>`;
+                }
+                return `
         <div class="job-card" onclick="openJob('${j.id}')">
             <div class="job-icon ${j.icon}">${ICONS[j.icon] || '📁'}</div>
             ${j.multi_file ? '<span class="job-badge">2 Files</span>' : ''}
             <h3>${j.name}</h3>
             <p>${j.description}</p>
-        </div>
-    `).join('');
+        </div>`;
+            }).join('');
         }
 
         // ── Modal ──

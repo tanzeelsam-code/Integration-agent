@@ -9,7 +9,7 @@ from .document_analysis import process_analysis
 from .comparison import process_comparison
 from .project_management import process_project_management
 from .report_writing import process_report
-from .jis_mapping import process_jis_mapping
+
 from .cv_rewriting import process_cv_rewrite
 from .contract_management import process_contract
 from input_adapter import supported_extensions_csv
@@ -104,19 +104,15 @@ JOB_REGISTRY = {
         ],
         "processor": process_report,
     },
-    "jis_mapping": {
-        "name": "JIS Mapping",
-        "description": "Generate Results Framework, LogFrame, and M&E mapping from project documents",
-        "icon": "jis",
-        "accept": ACCEPTED_UPLOADS,
+    "gis_map": {
+        "name": "GIS Map",
+        "description": "Interactive map of Gilgit-Baltistan energy infrastructure — hydropower, solar, wind, grid",
+        "icon": "gis",
+        "accept": ".geojson,.json",
         "multi_file": False,
-        "fields": [
-            {"id": "framework_type", "label": "Framework Type", "type": "select",
-             "options": ["Results Framework", "Logical Framework (LogFrame)", "M&E Matrix", "Full Package"],
-             "default": "Full Package"},
-            {"id": "sector", "label": "Sector", "default": "Energy"},
-        ],
-        "processor": process_jis_mapping,
+        "fields": [],
+        "processor": None,
+        "link": "/map",
     },
     "cv_rewrite": {
         "name": "CV Reception & Rewriting",
@@ -159,7 +155,7 @@ def list_jobs() -> list[dict]:
     """Return list of all jobs with metadata (no processor reference)."""
     result = []
     for jid, info in JOB_REGISTRY.items():
-        result.append({
+        entry = {
             "id": jid,
             "name": info["name"],
             "description": info["description"],
@@ -167,5 +163,8 @@ def list_jobs() -> list[dict]:
             "accept": info["accept"],
             "multi_file": info["multi_file"],
             "fields": info["fields"],
-        })
+        }
+        if info.get("link"):
+            entry["link"] = info["link"]
+        result.append(entry)
     return result
