@@ -35,9 +35,10 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 SUPPORTED_UPLOADS = supported_extensions_csv()
 
 
-def _build_download_name(prefix: str, source_filename: str) -> str:
+def _build_download_name(prefix: str, source_filename: str, extension: str = ".docx") -> str:
     stem = Path(secure_filename(source_filename or "document")).stem or "document"
-    return f"{prefix}_{stem}.docx"
+    ext = extension if extension.startswith(".") else f".{extension}"
+    return f"{prefix}_{stem}{ext}"
 
 
 def _append_conversion_notes(summary: str, notes: list[str]) -> str:
@@ -266,7 +267,8 @@ def process_job(job_type):
     ext2 = Path(file2.filename).suffix.lower() if file2 else None
     input_path2 = os.path.join(UPLOAD_DIR, f"{job_id}_input2{ext2}") if file2 else None
     prepared_input2 = os.path.join(UPLOAD_DIR, f"{job_id}_input2_prepared.docx") if file2 else None
-    output_path = os.path.join(UPLOAD_DIR, f"{job_id}_output.docx")
+    file_ext = ".csv" if job_type == "gis" else ".docx"
+    output_path = os.path.join(UPLOAD_DIR, f"{job_id}_output{file_ext}" )
 
     file1.save(input_path)
     if file2:
@@ -299,7 +301,10 @@ def process_job(job_type):
             summary = processor(process_path1, output_path, **params)
         summary = _append_conversion_notes(summary, conversion_notes)
 
-        out_filename = _build_download_name(job_type.upper(), file1.filename)
+        prefix = job_type.upper()
+        file_ext = ".csv" if job_type == "gis" else ".docx"
+        stem = Path(secure_filename(file1.filename or "document")).stem or "document"
+        out_filename = f"{prefix}_{stem}{file_ext}"
 
         return jsonify(
             {
@@ -328,13 +333,16 @@ def download(job_id, filename):
     if not job_id.isalnum():
         return jsonify({"error": "Invalid job ID"}), 400
 
-    output_path = os.path.join(UPLOAD_DIR, f"{job_id}_output.docx")
+    # Determine if it's a CSV or DOCX job
+    file_ext = ".csv" if filename.lower().endswith(".csv") else ".docx"
+    output_path = os.path.join(UPLOAD_DIR, f"{job_id}_output{file_ext}")
+    
     if not os.path.exists(output_path):
         return jsonify({"error": "File not found or expired"}), 404
 
-    safe_filename = secure_filename(filename) or f"{job_id}.docx"
-    if not safe_filename.lower().endswith(".docx"):
-        safe_filename = safe_filename + ".docx"
+    safe_filename = secure_filename(filename) or f"{job_id}{file_ext}"
+    if not safe_filename.lower().endswith((".docx", ".csv")):
+        safe_filename = safe_filename + file_ext
 
     from flask import make_response, after_this_request
 
@@ -351,7 +359,10 @@ def download(job_id, filename):
         return response
 
     response = make_response(data)
-    response.headers["Content-Type"] = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    if file_ext == ".csv":
+        response.headers["Content-Type"] = "text/csv"
+    else:
+        response.headers["Content-Type"] = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     response.headers["Content-Disposition"] = f'attachment; filename="{safe_filename}"'
     return response
 

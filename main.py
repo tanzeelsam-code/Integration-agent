@@ -29,6 +29,7 @@ from jobs.report_writing import process_report
 from jobs.jis_mapping import process_jis_mapping
 from jobs.cv_rewriting import process_cv_rewrite
 from jobs.contract_management import process_contract
+from jobs.gis_extraction import process_gis
 from input_adapter import (
     is_supported_filename,
     normalize_input_to_docx,
@@ -151,6 +152,13 @@ def cmd_contract(args):
         return _append_conversion_notes(summary, [note])
 
 
+def cmd_gis(args):
+    with tempfile.TemporaryDirectory(prefix="integration_cli_") as temp_dir:
+        input_path, note = _prepare_input(args.input, temp_dir, "input1")
+        summary = process_gis(input_path, args.output)
+        return _append_conversion_notes(summary, [note])
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="AGENT ZEE — AI Document Processing Assistant",
@@ -225,6 +233,11 @@ def main():
     p.add_argument("--client-name", default="Unknown Client")
     p.add_argument("--type", default="Standard Consulting")
 
+    # GIS Extraction
+    p = sub.add_parser("gis", help="Extract GPS coordinate points to CSV")
+    p.add_argument("input", help=input_help)
+    p.add_argument("-o", "--output", required=True)
+
     args = parser.parse_args()
     if not args.command:
         parser.print_help()
@@ -241,7 +254,7 @@ def main():
     handlers = {
         "format": cmd_format, "proposal": cmd_proposal, "analyze": cmd_analyze,
         "compare": cmd_compare, "project": cmd_project, "report": cmd_report,
-        "jis": cmd_jis, "cv": cmd_cv, "contract": cmd_contract,
+        "jis": cmd_jis, "cv": cmd_cv, "contract": cmd_contract, "gis": cmd_gis,
     }
 
     try:
