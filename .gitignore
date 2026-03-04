@@ -1,4 +1,5 @@
 venv/
+venv_gis/
 __pycache__/
 *.pyc
 .env
