@@ -1,7 +1,7 @@
 """
 AGENT ZEE — Proposal Development Engine
 Analyzes draft proposals/TORs and generates structured proposal documents
-compliant with WB, EU, and ADB requirements.
+compliant with donor/client requirements.
 """
 
 from docx import Document
@@ -40,6 +40,42 @@ CLIENT_SECTIONS = {
         "Work Plan",
         "Staffing Schedule",
         "Counterpart Facilities Required",
+    ],
+    "GIZ": [
+        "Executive Summary",
+        "Context and Problem Analysis",
+        "Objectives and Expected Results",
+        "Methodology and Implementation Concept",
+        "Work Plan and Deliverables",
+        "Team Composition and Roles",
+        "Quality Assurance and Risk Management",
+    ],
+    "KfW": [
+        "Executive Summary",
+        "Project Background and Rationale",
+        "Approach and Methodology",
+        "Implementation Arrangements",
+        "Schedule and Milestones",
+        "Team Structure and Expert Inputs",
+        "Monitoring and Reporting",
+    ],
+    "AFD": [
+        "Executive Summary",
+        "Context and Strategic Alignment",
+        "Methodology and Technical Approach",
+        "Results Framework and Indicators",
+        "Implementation Plan",
+        "Team Composition and Governance",
+        "Sustainability and Risk Mitigation",
+    ],
+    "EBRD": [
+        "Executive Summary",
+        "Assignment Understanding",
+        "Technical Methodology",
+        "Work Plan and Timeline",
+        "Team Composition and Key Experts",
+        "Relevant Experience and References",
+        "Project Management and Quality Control",
     ],
     "Other": [
         "Executive Summary",
@@ -129,6 +165,7 @@ def process_proposal(input_path, output_path, **kwargs):
         Summary string describing what was generated.
     """
     client_type = kwargs.get("client_type", "World Bank (WB)")
+    assigned_agents = kwargs.get("assigned_agents", "4")
     project_title = kwargs.get("project_title", "Untitled Project")
     country = kwargs.get("country", "Pakistan")
 
@@ -159,6 +196,11 @@ def process_proposal(input_path, output_path, **kwargs):
     para = doc.add_paragraph()
     para.alignment = WD_ALIGN_PARAGRAPH.CENTER
     run = para.add_run(f"\nCountry/Region: {country}")
+    _set_run_style(run, 12, color=GREY)
+
+    para = doc.add_paragraph()
+    para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run = para.add_run(f"\nAssigned Agents: {assigned_agents}")
     _set_run_style(run, 12, color=GREY)
 
     para = doc.add_paragraph()
@@ -254,6 +296,7 @@ def process_proposal(input_path, output_path, **kwargs):
         f"PROPOSAL DEVELOPMENT SUMMARY\n"
         f"{'=' * 40}\n"
         f"Client Type:           {client_type}\n"
+        f"Assigned Agents:       {assigned_agents}\n"
         f"Project Title:         {project_title or 'Untitled'}\n"
         f"Country/Region:        {country}\n"
         f"Source Word Count:     {source_word_count:,}\n"
