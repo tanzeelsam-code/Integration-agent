@@ -249,6 +249,37 @@
             color: var(--green-haze);
         }
 
+        .job-card.report-pipeline {
+            border-color: rgba(236, 72, 153, 0.38);
+            background:
+                linear-gradient(140deg, rgba(236, 72, 153, 0.14) 0%, rgba(17, 29, 46, 0.92) 55%),
+                var(--bg-card);
+        }
+
+        .job-card.report-pipeline:hover {
+            border-color: rgba(236, 72, 153, 0.65);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(236, 72, 153, 0.45);
+        }
+
+        .pipeline-badges {
+            margin-top: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .pipeline-chip {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.35px;
+            text-transform: uppercase;
+            border-radius: 999px;
+            padding: 4px 8px;
+            color: #fbcfe8;
+            background: rgba(236, 72, 153, 0.2);
+            border: 1px solid rgba(251, 207, 232, 0.25);
+        }
+
         /* ── Modal Overlay ── */
         .modal-overlay {
             display: none;
@@ -527,6 +558,66 @@
 
         .field select option {
             background: var(--bg-secondary);
+        }
+
+        .field-note {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        .workflow-card {
+            margin-top: 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: linear-gradient(135deg, rgba(0, 153, 89, 0.08), rgba(59, 130, 246, 0.06));
+            padding: 16px;
+        }
+
+        .workflow-card h4 {
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .workflow-card p {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .workflow-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 7px;
+            margin-bottom: 10px;
+        }
+
+        .workflow-item {
+            font-size: 12px;
+            color: var(--text-primary);
+            background: rgba(17, 29, 46, 0.72);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 10px;
+        }
+
+        .workflow-capacity {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .workflow-tag {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            color: var(--green-light);
+            background: rgba(0, 153, 89, 0.16);
+            border: 1px solid rgba(0, 184, 107, 0.35);
+            border-radius: 999px;
+            padding: 5px 10px;
         }
 
         /* ── Process Button ── */
@@ -811,6 +902,20 @@
             <p>${j.description}</p>
         </div>`;
                 }
+                if (j.id === 'report') {
+                    return `
+        <div class="job-card report-pipeline" onclick="openJob('${j.id}')">
+            <div class="job-icon ${j.icon}">${ICONS[j.icon] || '📁'}</div>
+            <span class="job-badge">4 Agents</span>
+            <h3>Report Pipeline</h3>
+            <p>Dedicated workflow for writing, review, revision of reviewed reports, and comment resolution.</p>
+            <div class="pipeline-badges">
+                <span class="pipeline-chip">Review</span>
+                <span class="pipeline-chip">Revision</span>
+                <span class="pipeline-chip">Comments</span>
+            </div>
+        </div>`;
+                }
                 return `
         <div class="job-card" onclick="openJob('${j.id}')">
             <div class="job-icon ${j.icon}">${ICONS[j.icon] || '📁'}</div>
@@ -900,17 +1005,38 @@
                 html += '<div class="fields-grid">';
                 for (const f of job.fields) {
                     const isSelect = f.type === 'select';
+                    const isFixedReportAgents = job.id === 'report' && f.id === 'assigned_agents';
                     if (isSelect) {
                         html += `<div class="field"><label>${f.label}</label>
                     <select id="field_${f.id}">
                         ${f.options.map(o => `<option value="${o}" ${o === f.default ? 'selected' : ''}>${o}</option>`).join('')}
-                    </select></div>`;
+                    </select>
+                    ${isFixedReportAgents ? '<div class="field-note">Fixed 4-agent team workflow</div>' : ''}
+                    </div>`;
                     } else {
                         html += `<div class="field"><label>${f.label}</label>
                     <input type="text" id="field_${f.id}" value="${f.default || ''}" placeholder="${f.label}"></div>`;
                     }
                 }
                 html += '</div>';
+            }
+
+            if (job.id === 'report') {
+                html += `<div class="workflow-card">
+                    <h4>4-Agent Report Workflow</h4>
+                    <p>Report writing runs with four dedicated agents to draft, review, revise reviewed reports, and close comments.</p>
+                    <div class="workflow-list">
+                        <div class="workflow-item">Agent 1: Lead Writer</div>
+                        <div class="workflow-item">Agent 2: Technical Reviewer</div>
+                        <div class="workflow-item">Agent 3: Revision Specialist</div>
+                        <div class="workflow-item">Agent 4: Comment Resolution Lead</div>
+                    </div>
+                    <div class="workflow-capacity">
+                        <span class="workflow-tag">Review Capacity</span>
+                        <span class="workflow-tag">Revision Capacity</span>
+                        <span class="workflow-tag">Comment Handling</span>
+                    </div>
+                </div>`;
             }
 
             // Button, progress, error, result

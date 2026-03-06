@@ -110,6 +110,8 @@ JOB_REGISTRY = {
              "options": ["World Bank", "European Union", "ADB", "Generic Professional"],
              "default": "Generic Professional"},
             {"id": "report_title", "label": "Report Title", "default": ""},
+            {"id": "assigned_agents", "label": "Assigned Agents", "type": "select",
+             "options": ["4"], "default": "4"},
             {"id": "include_exec_summary", "label": "Include Executive Summary", "type": "select",
              "options": ["Yes", "No"], "default": "Yes"},
         ],

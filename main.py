@@ -117,6 +117,7 @@ def cmd_report(args):
             input_path, args.output,
             report_style=args.style, report_title=args.title,
             include_exec_summary=args.exec_summary,
+            assigned_agents=args.agents,
         )
         return _append_conversion_notes(summary, [note])
 
@@ -209,6 +210,7 @@ def main():
     p.add_argument("-o", "--output", required=True)
     p.add_argument("--style", default="Generic Professional")
     p.add_argument("--title", default="Report")
+    p.add_argument("--agents", default="4")
     p.add_argument("--exec-summary", default="Yes", choices=["Yes","No"])
 
     # JIS

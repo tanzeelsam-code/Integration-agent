@@ -67,7 +67,7 @@ python main.py compare doc_a.docx doc_b.docx -o comparison.docx
 python main.py project project.docx -o pm_report.docx --name "GB Energy" --duration 24
 
 # Report Writing
-python main.py report raw.docx -o report.docx --style "World Bank" --title "Final Report"
+python main.py report raw.docx -o report.docx --style "World Bank" --title "Final Report" --agents 4
 
 # JIS Mapping
 python main.py jis project.docx -o jis.docx --framework "Full Package" --sector "Energy"
